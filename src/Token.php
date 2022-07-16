@@ -14,12 +14,12 @@ class Token
 
     public function __construct($name, $dropValue, $address,)
     {
-        $this->name = $name;
+        $this->name = strtolower($name);
         $this->dropValue = $dropValue;
-        $this->address = $address;
-        $this->cmcLink = 'https://coinmarketcap.com/currencies/' . $name;
-        $this->coingeckoLink = 'https://www.coingecko.com/en/coins/' . strstr($address, '/address/');
-        $this->poocoinLink = 'https://poocoin.app/tokens/' . strstr($address, '/address/');
+        $this->address = trim(str_replace('/address/', '', $address));
+        $this->cmcLink = 'https://coinmarketcap.com/currencies/' . $this->name;
+        $this->coingeckoLink = 'https://www.coingecko.com/en/coins/' . $this->address;
+        $this->poocoinLink = 'https://poocoin.app/tokens/' . $this->address;
     }
 
     /**

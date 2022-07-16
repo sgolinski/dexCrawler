@@ -13,7 +13,7 @@ use Symfony\Component\Panther\Client as PantherClient;
 class Crawler
 {
     private PantherClient $client;
-    private array $returnCoins;
+    private array $returnCoins = [];
     private const SCRIPT = <<<EOF
 var selectedA = document.querySelector('#selectDex');
 var divWithDexList = document.querySelector('#selectDexButton');
