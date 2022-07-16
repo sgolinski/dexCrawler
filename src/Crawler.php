@@ -27,15 +27,10 @@ EOF;
 location.reload();
 EOF;
 
-    public function __construct()
-    {
-        $this->client = PantherClientSingleton::getChromeClient();
-
-    }
-
     public function invoke()
     {
         try {
+            $this->client = PantherClient::createChromeClient();
             $this->client->start();
             $this->client->get('https://bscscan.com/dextracker?filter=1');
             $this->client->executeScript(self::SCRIPT);
@@ -119,18 +114,16 @@ EOF;
         $this->client->quit();
     }
 
-
     public function getReturnCoins(): ?array
     {
         return $this->returnCoins;
     }
 
 
-    public function getClient(): PantherClient
+    public function __destruct()
+    {
+    }    public function getClient(): PantherClient
     {
         return $this->client;
-    }
-
-   public function __destruct() {
     }
 }

@@ -16,5 +16,8 @@ $crawler->__destruct();
 
 if ($array !== null) {
     $dex->invoke($crawler->getReturnCoins());
+} else {
+    unset($dex);
+    die('nothing to show');
 }
 

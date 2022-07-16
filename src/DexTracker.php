@@ -17,14 +17,8 @@ class DexTracker
     {
         $this->slack = new SlackClient(self::HOOK);
     }
-
     public function invoke(array $tokens): void
     {
-
-        if (empty($tokens)) {
-            PantherClientSingleton::getChromeClient()->quit();
-            die('Nothing to show' . PHP_EOL);
-        }
         $this->sendMessage($tokens);
     }
 
