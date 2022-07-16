@@ -7,10 +7,8 @@ use Maknz\Slack\Attachment;
 use Maknz\Slack\Client as SlackClient;
 use Maknz\Slack\Message;
 
-
 class DexTracker
 {
-
     private SlackClient $slack;
 
     private const HOOK = 'https://hooks.slack.com/services/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';

@@ -71,16 +71,16 @@ EOF;
     {
 
         foreach ($content as $webElement) {
-            echo $count++ . PHP_EOL;
+
             assert($webElement instanceof RemoteWebElement);
             $price = null;
             $address = null;
             $name = null;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
 
-            if (str_contains($information, 'WBNB')) {
+            if (str_contains($information, 'BNB')) {
                 $priceInBNB = (float)explode(" ", $information)[0];
-                if ($priceInBNB >= 1) {
+                if ($priceInBNB >= 10) {
                     $price = $information;
                     $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
                     $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
@@ -88,7 +88,7 @@ EOF;
             }
             if (str_contains($information, 'USD')) {
                 $priceInUSD = (float)explode(" ", $information)[0];
-                if ($priceInUSD >= 100) {
+                if ($priceInUSD >= 2475.00) {
                     $price = $information;
                     $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
                     $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();

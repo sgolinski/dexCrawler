@@ -13,4 +13,4 @@ services:
       - ../:/mnt/app
     restart: always
     networks:
-      - dex_tracker_crawler
+      - dex_crawler
