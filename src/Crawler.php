@@ -117,6 +117,8 @@ EOF;
                 $this->returnCoins[] = new Token($name, $price, $address);
             }
         }
+        $this->client->quit();
+
     }
 
 
