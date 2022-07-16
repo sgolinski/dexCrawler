@@ -37,7 +37,6 @@ EOF;
             $selectRows = $this->client->findElement(WebDriverBy::id('ContentPlaceHolder1_ddlRecordsPerPage'));
             $webDriver = new WebDriverSelect($selectRows);
             $webDriver->selectByIndex(3);
-            sleep(1);
             $this->client->refreshCrawler();
             $data = $this->getContent();
             $this->getBNBorUSD($data);
@@ -85,6 +84,9 @@ EOF;
                     $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
                     $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
                 }
+                {
+                    continue;
+                }
             }
             if (str_contains($information, 'USD')) {
                 $priceInUSD = (float)explode(" ", $information)[0];
@@ -92,6 +94,8 @@ EOF;
                     $price = $information;
                     $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
                     $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
+                } else {
+                    continue;
                 }
             }
 
@@ -101,6 +105,8 @@ EOF;
                     $price = $information;
                     $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
                     $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
+                } else {
+                    continue;
                 }
             }
             if ($price !== null && !str_contains($name, 'BNB')
@@ -119,11 +125,7 @@ EOF;
         return $this->returnCoins;
     }
 
-
     public function __destruct()
     {
-    }    public function getClient(): PantherClient
-    {
-        return $this->client;
     }
 }
