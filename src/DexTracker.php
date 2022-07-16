@@ -21,7 +21,7 @@ class DexTracker
     public function invoke(array $tokens): void
     {
 
-        if (empty($this->currentRound)) {
+        if (empty($tokens)) {
             PantherClientSingleton::getChromeClient()->quit();
             die('Nothing to show' . PHP_EOL);
         }
