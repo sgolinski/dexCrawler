@@ -1,0 +1,18 @@
+<?php
+
+use CrawlerCoinGecko\DexTracker;
+use CrawlerCoinGecko\Crawler;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+header("Content-Type: text/plain");
+
+$crawler = new Crawler();
+$dex = new DexTracker();
+
+$crawler->invoke();
+
+if ($crawler->getReturnCoins() !== null) {
+    $dex->invoke($crawler->getReturnCoins());
+}
+

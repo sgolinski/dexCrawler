@@ -1,0 +1,16 @@
+version: "3.7"
+
+networks:
+  coingecko:
+    external: true
+
+services:
+  php-cli:
+    build:
+      dockerfile: docker/Dockerfile
+      context: ./..
+    volumes:
+      - ../:/mnt/app
+    restart: always
+    networks:
+      - dex_tracker_crawler
