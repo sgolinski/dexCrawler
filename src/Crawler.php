@@ -23,10 +23,6 @@ selectedA.click();
 divWithDexList.querySelector('#selectDexButton > a:nth-child(5) > img').click();
 EOF;
 
-    private const SCRIPT_RELOAD = <<<EOF
-location.reload();
-EOF;
-
     public function invoke()
     {
         try {
@@ -70,53 +66,40 @@ EOF;
     {
 
         foreach ($content as $webElement) {
-
             assert($webElement instanceof RemoteWebElement);
-            $price = null;
-            $address = null;
-            $name = null;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
+            $data = explode(" ", $information);
+            $coin = strtolower($data[1]);
+            $price = (float)$data[0];
 
-            if (str_contains($information, 'BNB')) {
-                $priceInBNB = (float)explode(" ", $information)[0];
-                if ($priceInBNB >= 10) {
-                    $price = $information;
-                    $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
-                    $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
-                }
-                {
-                    continue;
-                }
-            }
-            if (str_contains($information, 'USD')) {
-                $priceInUSD = (float)explode(" ", $information)[0];
-                if ($priceInUSD >= 2475.00) {
-                    $price = $information;
-                    $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
-                    $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
-                } else {
-                    continue;
-                }
+            if ($coin !== 'bnb' && $coin !== 'wbnb' && $coin !== 'cake' && !str_contains($coin, 'usd')) {
+                continue;
             }
 
-            if (str_contains($information, 'CAKE')) {
-                $priceInCAKE = (float)explode(" ", $information)[0];
-                if ($priceInCAKE >= 760.00) {
-                    $price = $information;
-                    $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
-                    $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
-                } else {
+            if ($coin === 'bnb' || $coin === 'wbnb') {
+                if ($price <= 10) {
+                    continue;
+                }
+            } elseif (str_contains($coin, 'usd')) {
+                if ($price <= 2475.00) {
+                    continue;
+                }
+            } elseif ($coin === 'cake') {
+                if ($price >= 760.00) {
                     continue;
                 }
             }
-            if ($price !== null && !str_contains($name, 'BNB')
-                && !str_contains($name, 'USD')
-                && !str_contains($name, 'ETH')
-                && !str_contains($name, 'CAKE')
-            ) {
-                $this->returnCoins[] = new Token($name, $price, $address);
+
+            $name = strtolower($webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText());
+            if ($name === 'bnb' || $name == 'wbnb' || $name === 'eth' || $name === 'cake' || $name = 'btcb' || !str_contains($name, 'usd')) {
+                continue;
             }
+            $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
+            $price = $information;
+
+            $this->returnCoins[] = new Token($name, $price, $address);
         }
+
         $this->client->quit();
     }
 
