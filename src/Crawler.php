@@ -48,7 +48,6 @@ EOF;
             $this->getBNBorUSD($data);
             $this->client->executeScript(self::SCRIPT_RELOAD);
             echo 'Downloading information about gainers and losers ' . date("F j, Y, g:i:s a") . PHP_EOL;
-
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
         } finally {
