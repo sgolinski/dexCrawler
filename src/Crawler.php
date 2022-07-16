@@ -35,6 +35,10 @@ EOF;
             $webDriver->selectByIndex(3);
             $this->client->refreshCrawler();
             $data = $this->getContent();
+            if ($data === null) {
+                $this->client->quit();
+                die('Error');
+            }
             $this->getBNBorUSD($data);
             echo 'Downloading information about gainers and losers ' . date("F j, Y, g:i:s a") . PHP_EOL;
         } catch (Exception $exception) {
@@ -44,7 +48,7 @@ EOF;
         }
     }
 
-    private function getContent(): ArrayIterator
+    private function getContent(): ?ArrayIterator
     {
         $list = null;
 
