@@ -131,4 +131,6 @@ EOF;
         return $this->client;
     }
 
+   public function __destruct() {
+    }
 }

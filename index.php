@@ -11,8 +11,10 @@ $crawler = new Crawler();
 $dex = new DexTracker();
 
 $crawler->invoke();
+$array = $crawler->getReturnCoins();
+$crawler->__destruct();
 
-if ($crawler->getReturnCoins() !== null) {
+if ($array !== null) {
     $dex->invoke($crawler->getReturnCoins());
 }
 
