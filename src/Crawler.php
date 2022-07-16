@@ -23,6 +23,10 @@ selectedA.click();
 divWithDexList.querySelector('#selectDexButton > a:nth-child(5) > img').click();
 EOF;
 
+    private const SCRIPT_RELOAD = <<<EOF
+location.reload();
+EOF;
+
     public function __construct()
     {
         $this->client = PantherClientSingleton::getChromeClient();
@@ -42,6 +46,9 @@ EOF;
             $this->client->refreshCrawler();
             $data = $this->getContent();
             $this->getBNBorUSD($data);
+            $this->client->executeScript(self::SCRIPT_RELOAD);
+            echo 'Downloading information about gainers and losers ' . date("F j, Y, g:i a") . PHP_EOL;
+
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
         } finally {
@@ -94,7 +101,20 @@ EOF;
                     $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
                 }
             }
-            if ($price !== null && !str_contains($name, 'BNB') && !str_contains($name, 'USD')) {
+
+            if (str_contains($information, 'CAKE')) {
+                $priceInCAKE = (float)explode(" ", $information)[0];
+                if ($priceInCAKE >= 760.00) {
+                    $price = $information;
+                    $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
+                    $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
+                }
+            }
+            if ($price !== null && !str_contains($name, 'BNB')
+                && !str_contains($name, 'USD')
+                && !str_contains($name, 'ETH')
+                && !str_contains($name, 'CAKE')
+            ) {
                 $this->returnCoins[] = new Token($name, $price, $address);
             }
         }
