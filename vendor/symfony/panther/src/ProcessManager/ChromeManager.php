@@ -46,11 +46,11 @@ final class ChromeManager implements BrowserManagerInterface
      */
     public function start(): WebDriver
     {
-        $url = $this->options['scheme'].'://'.$this->options['host'].':'.$this->options['port'];
+        $url = $this->options['scheme'] . '://' . $this->options['host'] . ':' . $this->options['port'];
         if (!$this->process->isRunning()) {
             $this->checkPortAvailable($this->options['host'], $this->options['port']);
             $this->process->start();
-            $this->waitUntilReady($this->process, $url.$this->options['path'], 'chrome');
+            $this->waitUntilReady($this->process, $url . $this->options['path'], 'chrome');
         }
 
         $capabilities = DesiredCapabilities::chrome();
@@ -126,7 +126,7 @@ final class ChromeManager implements BrowserManagerInterface
     private function createProcess(string $chromeDriverBinary): Process
     {
         $command = array_merge(
-            [$chromeDriverBinary, '--port='.$this->options['port']],
+            [$chromeDriverBinary, '--port=' . $this->options['port']],
             $this->options['chromedriver_arguments']
         );
 
@@ -138,10 +138,23 @@ final class ChromeManager implements BrowserManagerInterface
         return [
             'scheme' => 'http',
             'host' => '127.0.0.1',
-            'port' => 9515,
+            'port' => $this->get_unused_tcp_port(),
             'path' => '/status',
             'chromedriver_arguments' => [],
             'capabilities' => [],
         ];
+    }
+
+    private function get_unused_tcp_port()
+    {
+        $address = '127.0.0.1';
+        // Create a new socket
+        $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        // Bind the source address
+        socket_bind($sock, $address);
+        socket_getsockname($sock, $address, $port);
+        #echo $port;
+        socket_close($sock);
+        return $port;
     }
 }

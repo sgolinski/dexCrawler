@@ -57,7 +57,9 @@ EOF;
                 $this->client->refreshCrawler();
             }
             if (!empty($this->returnCoins)) {
-                $this->proveIfIsWorthToBuyIt($this->client, $this->returnCoins);
+                $this->returnCoins = $this->proveIfIsWorthToBuyIt($this->client, $this->returnCoins);
+            } else {
+                echo "Nothing to show at " . date("F j, Y, g:i:s a") . PHP_EOL;
             }
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
@@ -91,7 +93,7 @@ EOF;
         foreach ($content as $webElement) {
 
             assert($webElement instanceof RemoteWebElement);
-            //    echo self::$counter++;
+            // echo self::$counter++;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
             if ($information === null) {
                 continue;
@@ -142,9 +144,10 @@ EOF;
     {
     }
 
-    public function proveIfIsWorthToBuyIt(PantherClient $client, $coins): void
+    public function proveIfIsWorthToBuyIt(PantherClient $client, $coinsToCheck): array
     {
-        foreach ($coins as $coin) {
+        $coins = [];
+        foreach ($coinsToCheck as $coin) {
             assert($coin instanceof Token);
             $client->refreshCrawler();
             $client->get('https://bscscan.com/token/' . $coin->getAddress());
@@ -152,9 +155,11 @@ EOF;
                 ->filter('#ContentPlaceHolder1_tr_tokenHolders > div > div.col-md-8 > div > div')
                 ->getText();
             $holders = (int)str_replace(',', "", explode(' ', $holdersString)[0]);
-            if ($holders < 100) {
-                unset($coin);
+
+            if ($holders > 500) {
+                $coins[] = $coin;
             }
         }
+        return $coins;
     }
 }
