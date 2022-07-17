@@ -106,7 +106,7 @@ EOF;
             if (in_array($name, self::SKIPPED_COINS)) {
                 continue;
             }
-            if (!str_contains($name, 'usd')) {
+            if (str_contains($name, 'usd')) {
                 continue;
             }
             $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
