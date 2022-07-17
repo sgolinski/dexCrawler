@@ -96,7 +96,7 @@ EOF;
                     continue;
                 }
             } elseif ($coin === 'cake') {
-                if ($price >= 760.00) {
+                if ($price <= 760.00) {
                     continue;
                 }
             }
