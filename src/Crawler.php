@@ -148,6 +148,7 @@ EOF;
     {
         $coins = [];
         foreach ($coinsToCheck as $coin) {
+            $existed = false;
             assert($coin instanceof Token);
             $client->refreshCrawler();
             $client->get('https://bscscan.com/token/' . $coin->getAddress());
@@ -156,34 +157,20 @@ EOF;
                 ->getText();
             $holders = (int)str_replace(',', "", explode(' ', $holdersString)[0]);
 
-            if ($holders > 500) {
+            if (!empty($coins)) {
+                foreach ($coins as $checkUnique) {
+                    if ($checkUnique->getName() === $coin->getName()) {
+                        $existed = true;
+                    }
+                }
+            }
+
+            if ($holders > 500 && !$existed) {
                 $coins[] = $coin;
             }
         }
-        var_dump($coins);
-        die;
-        return array_unique($coins);
+        return $coins;
     }
 
-    public static function removeDuplicates($arr1, $arr2)
-    {
-        $uniqueArray = [];
-        $notUnique = false;
-        if (!empty($arr2)) {
-            foreach ($arr1 as $coin) {
-                $notUnique = false;
-                foreach ($arr2 as $coin2) {
-                    if ($coin->getName() == $coin2->getName()) {
-                        $notUnique = true;
-                    }
-                }
-                if (!$notUnique) {
-                    $uniqueArray[] = $coin;
-                }
-            }
-            return $uniqueArray;
-        } else {
-            return $arr1;
-        }
-    }
+
 }
