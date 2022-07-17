@@ -7,6 +7,8 @@ ENV PANTHER_CHROME_ARGUMENTS='--disable-dev-shm-usage'
 
 ##
 # needed php stuff
+COPY /opcache.ini /usr/local/etc/php/conf.d/
+
 RUN apk add libzip-dev libzip zip libxml2-dev \
     && docker-php-ext-install zip xml
 
@@ -14,7 +16,7 @@ RUN apk add libzip-dev libzip zip libxml2-dev \
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions sockets gd xdebug
+    install-php-extensions sockets gd
 #
 
 # headless browser stuff
