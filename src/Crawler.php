@@ -103,10 +103,13 @@ EOF;
             }
 
             try {
+
                 $data = explode(" ", $information);
-                $coin = $data[1];
-                $price = $data[0];
+                $coin = strtolower($data[1]);
+                $price = round((float)$data[0], 1);
+
             } catch (Exception $exception) {
+                echo $exception->getMessage();
                 continue;
             }
 
