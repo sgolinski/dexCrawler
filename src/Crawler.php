@@ -12,12 +12,12 @@ use Symfony\Component\Panther\Client as PantherClient;
 
 class Crawler
 {
-    private PantherClient $client;
+    private $client;
     private array $returnCoins = [];
     private const SKIPPED_COINS = [
         'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka', 'kishurai'
         , 'spacexfalcon', 'sin', 'tube', 'blue', 'vinu', '$codi', 'birdman', 'citi', 'xmx', 'ameta', 'tm', 'ape', 'hbx', 'dlsc', 'elon', 'klv', 'eshare', 'air', 'fi',
-        's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4'
+        's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4', 'iot'
     ];
 
     private const SCRIPT = <<<EOF
@@ -28,6 +28,11 @@ var select = document.getElementById('ContentPlaceHolder1_ddlRecordsPerPage');
 selectedA.click();
 divWithDexList.querySelector('#selectDexButton > a:nth-child(5) > img').click();
 EOF;
+
+    public function __construct()
+    {
+        $this->client = null;
+    }
 
     public function invoke()
     {
