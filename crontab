@@ -1,7 +1,6 @@
-*/2 * * * * php /mnt/app/index.php
+*/3 * * * * php /mnt/app/index.php
 */4 * * * * php /mnt/app/index.php
-*/6 * * * * php /mnt/app/index.php
-*/8 * * * * php /mnt/app/index.php
+
 
 # always remeber the last line of a crontab file must eb an empty line
 
