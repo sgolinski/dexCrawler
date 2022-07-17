@@ -4,6 +4,7 @@ namespace CrawlerCoinGecko;
 
 use ArrayIterator;
 use Exception;
+use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverSelect;
@@ -49,8 +50,8 @@ EOF;
             $webDriverSelect->selectByIndex(3);
             sleep(1);
 
-            for ($i = 0; $i < 50; $i++) {
-                //             $this->client->takeScreenshot('page' . $i . '.jpg');
+            for ($i = 0; $i < 20; $i++) {
+                //  $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
                 $this->getBnbOrUsd($data);
@@ -95,18 +96,20 @@ EOF;
         foreach ($content as $webElement) {
 
             assert($webElement instanceof RemoteWebElement);
-            //echo self::$counter++ . PHP_EOL;
+            //    echo self::$counter++ . PHP_EOL;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
 
             if ($information === null) {
                 continue;
             }
-
             try {
+
                 $data = explode(" ", $information);
-                $coin = $data[1];
-                $price = $data[0];
+                $coin = strtolower($data[1]);
+                $price = round((float)$data[0], 1);
+
             } catch (Exception $exception) {
+                echo $exception->getMessage();
                 continue;
             }
 
@@ -175,6 +178,7 @@ EOF;
             }
 
             if ($holders > 500 && !$existed) {
+                //       var_dump($coin);
                 $coins[] = $coin;
             }
         }
