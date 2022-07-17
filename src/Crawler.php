@@ -47,7 +47,7 @@ EOF;
             sleep(1);
 
             for ($i = 0; $i < 50; $i++) {
-                //     $this->client->takeScreenshot('page' . $i . '.jpg');
+                $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
                 $this->getBnbOrUsd($data);
@@ -93,7 +93,7 @@ EOF;
         foreach ($content as $webElement) {
 
             assert($webElement instanceof RemoteWebElement);
-            // echo self::$counter++;
+            echo self::$counter++ . PHP_EOL;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
             if ($information === null) {
                 continue;
@@ -160,6 +160,30 @@ EOF;
                 $coins[] = $coin;
             }
         }
+        var_dump($coins);
+        die;
         return array_unique($coins);
+    }
+
+    public static function removeDuplicates($arr1, $arr2)
+    {
+        $uniqueArray = [];
+        $notUnique = false;
+        if (!empty($arr2)) {
+            foreach ($arr1 as $coin) {
+                $notUnique = false;
+                foreach ($arr2 as $coin2) {
+                    if ($coin->getName() == $coin2->getName()) {
+                        $notUnique = true;
+                    }
+                }
+                if (!$notUnique) {
+                    $uniqueArray[] = $coin;
+                }
+            }
+            return $uniqueArray;
+        } else {
+            return $arr1;
+        }
     }
 }
