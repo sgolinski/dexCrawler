@@ -17,7 +17,7 @@ class Crawler
     private const SKIPPED_COINS = [
         'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka', 'kishurai'
         , 'spacexfalcon', 'sin', 'tube', 'blue', 'vinu', '$codi', 'birdman', 'citi', 'xmx', 'ameta', 'tm', 'ape', 'hbx', 'dlsc', 'elon', 'klv', 'eshare', 'air', 'fi',
-        's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4', 'iot'
+        's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4', 'iot', 'rpt', 'uki'
     ];
 
     private const SCRIPT = <<<EOF
@@ -115,8 +115,12 @@ EOF;
                 continue;
             }
             $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
-            $price = $information;
 
+            $holders = (int)$this->proveIfIsWorthToBuyIt($address, $this->client);
+
+            if ($holders < 100) {
+                continue;
+            }
             $this->returnCoins[] = new Token($name, $price, $address);
         }
         $this->client->close();
@@ -130,5 +134,16 @@ EOF;
 
     public function __destruct()
     {
+    }
+
+    private function proveIfIsWorthToBuyIt(?string $address, PantherClient $client): ?string
+    {
+        $client->refreshCrawler();
+        $client->get('https://bscscan.com/' . trim(str_replace('/address/', '/token/', $address)));
+        $holders = $client->getCrawler()
+            ->filter('#ContentPlaceHolder1_tr_tokenHolders > div > div.col-md-8 > div > div')
+            ->getText();
+
+        return $holders;
     }
 }
