@@ -30,6 +30,7 @@ class DexTracker
             $message->setText($coin->getDescription());
             $this->slack->sendMessage($message);
         }
+        echo 'Downloading information about gainers and losers ' . date("F j, Y, g:i:s a") . PHP_EOL;
     }
 
 

@@ -5,7 +5,6 @@ namespace CrawlerCoinGecko;
 use ArrayIterator;
 use Exception;
 use Facebook\WebDriver\Remote\RemoteWebElement;
-use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverSelect;
 use Symfony\Component\Panther\Client as PantherClient;
@@ -13,6 +12,7 @@ use Symfony\Component\Panther\Client as PantherClient;
 class Crawler
 {
     private $client;
+    public static $counter = 0;
     private array $returnCoins = [];
     private const SKIPPED_COINS = [
         'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka', 'kishurai'
@@ -42,13 +42,23 @@ EOF;
             $this->client->get('https://bscscan.com/dextracker?filter=1');
             $this->client->executeScript(self::SCRIPT);
             $selectRows = $this->client->findElement(WebDriverBy::id('ContentPlaceHolder1_ddlRecordsPerPage'));
-            $webDriver = new WebDriverSelect($selectRows);
-            $webDriver->selectByIndex(3);
+            $webDriverSelect = new WebDriverSelect($selectRows);
+            $webDriverSelect->selectByIndex(3);
             sleep(1);
-            $this->client->refreshCrawler();
-            $data = $this->getContent();
-            $this->getBNBorUSD($data);
-            echo 'Downloading information about gainers and losers ' . date("F j, Y, g:i:s a") . PHP_EOL;
+
+            for ($i = 0; $i < 10; $i++) {
+                $this->client->takeScreenshot('page' . $i . '.jpg');
+                $this->client->refreshCrawler();
+                $data = $this->getContent();
+                $this->getBnbOrUsd($data);
+                $nextPage = $this->client->findElement(WebDriverBy::cssSelector('#content > div.container.space-bottom-2 > div > div.card-body > div.d-md-flex.justify-content-between.mb-4 > nav > ul > li:nth-child(4) > a'));
+                usleep(200);
+                $nextPage->click();
+                $this->client->refreshCrawler();
+            }
+            if (!empty($this->returnCoins)) {
+                $this->proveIfIsWorthToBuyIt($this->client, $this->returnCoins);
+            }
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
         } finally {
@@ -79,7 +89,9 @@ EOF;
     {
 
         foreach ($content as $webElement) {
+
             assert($webElement instanceof RemoteWebElement);
+            echo self::$counter++;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
             if ($information === null) {
                 continue;
@@ -118,11 +130,7 @@ EOF;
 
             $this->returnCoins[] = new Token($name, $price, $address);
         }
-        if (count($this->returnCoins) > 0) {
-            $this->proveIfIsWorthToBuyIt($this->client);
-        }
-        $this->client->close();
-        $this->client->quit();
+
     }
 
     public function getReturnCoins(): ?array
@@ -134,9 +142,9 @@ EOF;
     {
     }
 
-    private function proveIfIsWorthToBuyIt(PantherClient $client): void
+    public function proveIfIsWorthToBuyIt(PantherClient $client, $coins): void
     {
-        foreach ($this->returnCoins as $coin) {
+        foreach ($coins as $coin) {
             assert($coin instanceof Token);
             $client->refreshCrawler();
             $client->get('https://bscscan.com/token/' . $coin->getAddress());
