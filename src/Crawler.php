@@ -37,6 +37,8 @@ EOF;
     public function invoke()
     {
         try {
+
+            echo "Start crawling " . date("F j, Y, g:i:s a") . PHP_EOL;
             $this->client = PantherClient::createChromeClient();
             $this->client->start();
             $this->client->get('https://bscscan.com/dextracker?filter=1');
@@ -47,7 +49,7 @@ EOF;
             sleep(1);
 
             for ($i = 0; $i < 50; $i++) {
-          //      $this->client->takeScreenshot('page' . $i . '.jpg');
+   //             $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
                 $this->getBnbOrUsd($data);
@@ -56,10 +58,9 @@ EOF;
                 $nextPage->click();
                 $this->client->refreshCrawler();
             }
+            echo "Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
             if (!empty($this->returnCoins)) {
                 $this->returnCoins = $this->proveIfIsWorthToBuyIt($this->client, $this->returnCoins);
-            } else {
-                echo "Nothing to show at " . date("F j, Y, g:i:s a") . PHP_EOL;
             }
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
@@ -93,7 +94,7 @@ EOF;
         foreach ($content as $webElement) {
 
             assert($webElement instanceof RemoteWebElement);
-         //   echo self::$counter++ . PHP_EOL;
+            //echo self::$counter++ . PHP_EOL;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
             if ($information === null) {
                 continue;
