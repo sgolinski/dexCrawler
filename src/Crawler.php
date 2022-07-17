@@ -4,7 +4,6 @@ namespace CrawlerCoinGecko;
 
 use ArrayIterator;
 use Exception;
-use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverSelect;
@@ -19,7 +18,7 @@ class Crawler
         'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka', 'kishurai'
         , 'spacexfalcon', 'sin', 'tube', 'blue', 'vinu', 'codi', 'birdman', 'citi', 'xmx', 'ameta', 'tm', 'ape', 'hbx', 'dlsc', 'elon', 'klv', 'eshare', 'air', 'fi',
         's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4', 'iot', 'rpt', 'uki', 'ada', 'spacepi', 'grush', 'mbox', 'pear', 'time', 'bsw', 'xrp',
-        'ceek', 'spacepi', 'lego'
+        'ceek', 'spacepi', 'lego', 'dot'
     ];
 
     private const SCRIPT = <<<EOF
@@ -50,8 +49,8 @@ EOF;
             $webDriverSelect->selectByIndex(3);
             sleep(1);
 
-            for ($i = 0; $i < 20; $i++) {
-                //  $this->client->takeScreenshot('page' . $i . '.jpg');
+            for ($i = 0; $i < 50; $i++) {
+               // $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
                 $this->getBnbOrUsd($data);
@@ -60,10 +59,13 @@ EOF;
                 $nextPage->click();
                 $this->client->refreshCrawler();
             }
-            echo "Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
-            if (!empty($this->returnCoins)) {
-                $this->returnCoins = $this->proveIfIsWorthToBuyIt($this->client, $this->returnCoins);
+            echo count($this->returnCoins) . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
+            if (empty($this->returnCoins)) {
+                $this->client->close();
+                $this->client->quit();
+                die();
             }
+            $this->returnCoins = $this->proveIfIsWorthToBuyIt($this->client, $this->returnCoins);
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
         } finally {
@@ -96,16 +98,19 @@ EOF;
         foreach ($content as $webElement) {
 
             assert($webElement instanceof RemoteWebElement);
-            //    echo self::$counter++ . PHP_EOL;
+            //echo self::$counter++ . PHP_EOL;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
-
             if ($information === null) {
                 continue;
             }
+
             try {
 
                 $data = explode(" ", $information);
-                $coin = strtolower($data[1]);
+                $coin = $data[1];
+                if ($coin !== null) {
+                    $coin = strtolower($coin);
+                }
                 $price = round((float)$data[0], 1);
 
             } catch (Exception $exception) {
@@ -167,6 +172,7 @@ EOF;
             $holdersString = $client->getCrawler()
                 ->filter('#ContentPlaceHolder1_tr_tokenHolders > div > div.col-md-8 > div > div')
                 ->getText();
+
             $holders = (int)str_replace(',', "", explode(' ', $holdersString)[0]);
 
             if (!empty($coins)) {
@@ -178,10 +184,10 @@ EOF;
             }
 
             if ($holders > 500 && !$existed) {
-                //       var_dump($coin);
                 $coins[] = $coin;
             }
         }
+        echo " Validation Finished  " . count($coins) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
         return $coins;
     }
 
