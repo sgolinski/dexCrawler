@@ -17,7 +17,8 @@ class Crawler
     private const SKIPPED_COINS = [
         'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka', 'kishurai'
         , 'spacexfalcon', 'sin', 'tube', 'blue', 'vinu', '$codi', 'birdman', 'citi', 'xmx', 'ameta', 'tm', 'ape', 'hbx', 'dlsc', 'elon', 'klv', 'eshare', 'air', 'fi',
-        's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4', 'iot', 'rpt', 'uki'
+        's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4', 'iot', 'rpt', 'uki', 'ada', 'spacepi', '$grush', 'mbox', 'pear', 'time', 'bsw', 'xrp',
+        'ceek', 'spacepi'
     ];
 
     private const SCRIPT = <<<EOF
@@ -49,7 +50,7 @@ EOF;
             sleep(1);
 
             for ($i = 0; $i < 10; $i++) {
-               // $this->client->takeScreenshot('page' . $i . '.jpg');
+                // $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
                 $this->getBnbOrUsd($data);
