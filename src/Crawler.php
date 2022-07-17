@@ -97,7 +97,7 @@ EOF;
                     continue;
                 }
             } elseif (str_contains($coin, 'usd')) {
-                if ($price <= 2475.00) {
+                if ($price <= 2470.00) {
                     continue;
                 }
             } elseif ($coin === 'cake') {
@@ -116,12 +116,10 @@ EOF;
             }
             $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
 
-            $holders = (int)$this->proveIfIsWorthToBuyIt($address, $this->client);
-
-            if ($holders < 100) {
-                continue;
-            }
             $this->returnCoins[] = new Token($name, $price, $address);
+        }
+        if (count($this->returnCoins) > 0) {
+            $this->proveIfIsWorthToBuyIt($this->client);
         }
         $this->client->close();
         $this->client->quit();
@@ -136,14 +134,19 @@ EOF;
     {
     }
 
-    private function proveIfIsWorthToBuyIt(?string $address, PantherClient $client): ?string
+    private function proveIfIsWorthToBuyIt(PantherClient $client): void
     {
-        $client->refreshCrawler();
-        $client->get('https://bscscan.com/' . trim(str_replace('/address/', '/token/', $address)));
-        $holders = $client->getCrawler()
-            ->filter('#ContentPlaceHolder1_tr_tokenHolders > div > div.col-md-8 > div > div')
-            ->getText();
-
-        return $holders;
+        foreach ($this->returnCoins as $coin) {
+            assert($coin instanceof Token);
+            $client->refreshCrawler();
+            $client->get('https://bscscan.com/token/' . $coin->getAddress());
+            $holdersString = $client->getCrawler()
+                ->filter('#ContentPlaceHolder1_tr_tokenHolders > div > div.col-md-8 > div > div')
+                ->getText();
+            $holders = (int)str_replace(',', "", explode(' ', $holdersString)[0]);
+            if ($holders < 100) {
+                unset($coin);
+            }
+        }
     }
 }

@@ -63,6 +63,15 @@ class Token
         return $this->poocoinLink;
     }
 
+    /**
+     * @return string
+     */
+    public function getAddress(): string
+    {
+        return $this->address;
+    }
+
+
 
     public function getDescription(): ?string
     {
