@@ -20,4 +20,3 @@ if ($array !== null) {
     unset($dex);
     die('nothing to show');
 }
-

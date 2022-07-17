@@ -14,6 +14,12 @@ class Crawler
 {
     private PantherClient $client;
     private array $returnCoins = [];
+    private const SKIPPED_COINS = [
+        'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka', 'kishurai'
+        , 'spacexfalcon', 'sin', 'tube', 'blue', 'vinu', '$codi', 'birdman', 'citi', 'xmx', 'ameta', 'tm', 'ape', 'hbx', 'dlsc', 'elon', 'klv', 'eshare', 'air', 'fi',
+        's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4'
+    ];
+
     private const SCRIPT = <<<EOF
 var selectedA = document.querySelector('#selectDex');
 var divWithDexList = document.querySelector('#selectDexButton');
@@ -41,6 +47,7 @@ EOF;
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
         } finally {
+            $this->client->close();
             $this->client->quit();
         }
     }
@@ -69,6 +76,9 @@ EOF;
         foreach ($content as $webElement) {
             assert($webElement instanceof RemoteWebElement);
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
+            if ($information === null) {
+                continue;
+            }
             $data = explode(" ", $information);
             $coin = strtolower($data[1]);
             $price = (float)$data[0];
@@ -92,7 +102,11 @@ EOF;
             }
 
             $name = strtolower($webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText());
-            if ($name === 'bnb' || $name == 'wbnb' || $name === 'eth' || $name === 'cake' || $name = 'btcb' || !str_contains($name, 'usd')) {
+
+            if (in_array($name, self::SKIPPED_COINS)) {
+                continue;
+            }
+            if (!str_contains($name, 'usd')) {
                 continue;
             }
             $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
@@ -100,7 +114,7 @@ EOF;
 
             $this->returnCoins[] = new Token($name, $price, $address);
         }
-
+        $this->client->close();
         $this->client->quit();
     }
 
