@@ -101,7 +101,7 @@ EOF;
             }
             $data = explode(" ", $information);
             $coin = strtolower($data[1]);
-            $price = (float)$data[0];
+            $price = round((float)$data[0], 1);
 
             if ($coin !== 'bnb' && $coin !== 'wbnb' && $coin !== 'cake' && !str_contains($coin, 'usd')) {
                 continue;
@@ -131,7 +131,7 @@ EOF;
             }
             $address = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getAttribute('href');
 
-            $this->returnCoins[] = new Token($name, $price, $address);
+            $this->returnCoins[] = new Token($name, $price . ' ' . $coin, $address);
         }
 
     }
@@ -161,6 +161,6 @@ EOF;
                 $coins[] = $coin;
             }
         }
-        return $coins;
+        return array_unique($coins);
     }
 }
