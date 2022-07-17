@@ -18,7 +18,7 @@ class Crawler
         'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka', 'kishurai'
         , 'spacexfalcon', 'sin', 'tube', 'blue', 'vinu', '$codi', 'birdman', 'citi', 'xmx', 'ameta', 'tm', 'ape', 'hbx', 'dlsc', 'elon', 'klv', 'eshare', 'air', 'fi',
         's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4', 'iot', 'rpt', 'uki', 'ada', 'spacepi', '$grush', 'mbox', 'pear', 'time', 'bsw', 'xrp',
-        'ceek', 'spacepi'
+        'ceek', 'spacepi', 'lego'
     ];
 
     private const SCRIPT = <<<EOF
@@ -50,7 +50,7 @@ EOF;
             sleep(1);
 
             for ($i = 0; $i < 10; $i++) {
-                // $this->client->takeScreenshot('page' . $i . '.jpg');
+                //             $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
                 $this->getBnbOrUsd($data);
@@ -97,12 +97,18 @@ EOF;
             assert($webElement instanceof RemoteWebElement);
             //echo self::$counter++ . PHP_EOL;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
+
             if ($information === null) {
                 continue;
             }
-            $data = explode(" ", $information);
-            $coin = strtolower($data[1]);
-            $price = round((float)$data[0], 1);
+
+            try {
+                $data = explode(" ", $information);
+                $coin = $data[1];
+                $price = $data[0];
+            } catch (Exception $exception) {
+                continue;
+            }
 
             if ($coin !== 'bnb' && $coin !== 'wbnb' && $coin !== 'cake' && !str_contains($coin, 'usd')) {
                 continue;
