@@ -1,4 +1,6 @@
 * * * * * php /mnt/app/index.php
+* * * * *  sleep 20; php /mnt/app/index.php
+* * * * *  sleep 40; php /mnt/app/index.php
 
 # always remeber the last line of a crontab file must eb an empty line
 

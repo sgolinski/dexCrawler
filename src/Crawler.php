@@ -37,6 +37,8 @@ EOF;
     public function invoke()
     {
         try {
+
+            echo "Start crawling " . date("F j, Y, g:i:s a") . PHP_EOL;
             $this->client = PantherClient::createChromeClient();
             $this->client->start();
             $this->client->get('https://bscscan.com/dextracker?filter=1');
@@ -56,10 +58,9 @@ EOF;
                 $nextPage->click();
                 $this->client->refreshCrawler();
             }
+            echo "Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
             if (!empty($this->returnCoins)) {
                 $this->returnCoins = $this->proveIfIsWorthToBuyIt($this->client, $this->returnCoins);
-            } else {
-                echo "Nothing to show at " . date("F j, Y, g:i:s a") . PHP_EOL;
             }
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
