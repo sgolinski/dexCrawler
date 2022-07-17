@@ -49,7 +49,7 @@ EOF;
             sleep(1);
 
             for ($i = 0; $i < 50; $i++) {
-   //             $this->client->takeScreenshot('page' . $i . '.jpg');
+                //             $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
                 $this->getBnbOrUsd($data);
