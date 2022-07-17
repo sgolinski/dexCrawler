@@ -16,8 +16,8 @@ class Crawler
     private array $returnCoins = [];
     private const SKIPPED_COINS = [
         'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka', 'kishurai'
-        , 'spacexfalcon', 'sin', 'tube', 'blue', 'vinu', '$codi', 'birdman', 'citi', 'xmx', 'ameta', 'tm', 'ape', 'hbx', 'dlsc', 'elon', 'klv', 'eshare', 'air', 'fi',
-        's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4', 'iot', 'rpt', 'uki', 'ada', 'spacepi', '$grush', 'mbox', 'pear', 'time', 'bsw', 'xrp',
+        , 'spacexfalcon', 'sin', 'tube', 'blue', 'vinu', 'codi', 'birdman', 'citi', 'xmx', 'ameta', 'tm', 'ape', 'hbx', 'dlsc', 'elon', 'klv', 'eshare', 'air', 'fi',
+        's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx', 'mobox', 'lgbt', 'plf', 'google', 'web4', 'iot', 'rpt', 'uki', 'ada', 'spacepi', 'grush', 'mbox', 'pear', 'time', 'bsw', 'xrp',
         'ceek', 'spacepi', 'lego'
     ];
 
@@ -128,7 +128,8 @@ EOF;
                 }
             }
 
-            $name = strtolower($webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText());
+            $name = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))->getText();
+            $name = strtolower(str_replace(['$'], '', ($name)));
 
             if (in_array($name, self::SKIPPED_COINS)) {
                 continue;
