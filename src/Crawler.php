@@ -47,7 +47,7 @@ EOF;
             sleep(1);
 
             for ($i = 0; $i < 10; $i++) {
-                $this->client->takeScreenshot('page' . $i . '.jpg');
+                //  $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
                 $this->getBnbOrUsd($data);
@@ -91,7 +91,7 @@ EOF;
         foreach ($content as $webElement) {
 
             assert($webElement instanceof RemoteWebElement);
-            echo self::$counter++;
+            // echo self::$counter++;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
             if ($information === null) {
                 continue;
