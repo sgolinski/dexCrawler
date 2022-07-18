@@ -1,4 +1,4 @@
-*/4 * * * * php /mnt/app/index.php
+*/5 * * * * php /mnt/app/index.php
 
 # always remeber the last line of a crontab file must eb an empty line
 
