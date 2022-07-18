@@ -1,6 +1,6 @@
 <?php
 
-namespace CrawlerCoinGecko;
+namespace DexCrawler;
 
 class Token
 {

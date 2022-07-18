@@ -2,7 +2,7 @@
     "name": "szymon/dex_tracker_crawler",
     "autoload": {
         "psr-4": {
-            "CrawlerCoinGecko\\": "src/"
+            "DexCrawler\\": "src/"
         }
     },
     "authors": [

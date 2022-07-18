@@ -1,6 +1,6 @@
 <?php
 
-namespace CrawlerCoinGecko;
+namespace DexCrawler;
 
 use ArrayIterator;
 use Exception;
@@ -50,7 +50,7 @@ EOF;
             sleep(1);
 
             for ($i = 0; $i < 50; $i++) {
-               // $this->client->takeScreenshot('page' . $i . '.jpg');
+                // $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
                 $this->getBnbOrUsd($data);
@@ -100,24 +100,30 @@ EOF;
             assert($webElement instanceof RemoteWebElement);
             //echo self::$counter++ . PHP_EOL;
             $information = $webElement->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))->getText();
+            usleep(10000);
+
+            $coin = null;
+            $price = null;
             if ($information === null) {
                 continue;
             }
 
             try {
-
                 $data = explode(" ", $information);
-                $coin = $data[1];
-                if ($coin !== null) {
-                    $coin = strtolower($coin);
-                }
-                $price = round((float)$data[0], 1);
 
+                if (isset($data[1])) {
+                    $coin = strtolower($data[1]);
+                }
+                if (isset($data[0])) {
+                    $price = round((float)$data[0], 1);
+                }
             } catch (Exception $exception) {
                 echo $exception->getMessage();
                 continue;
             }
-
+            if ($price === null || $coin == null) {
+                continue;
+            }
             if ($coin !== 'bnb' && $coin !== 'wbnb' && $coin !== 'cake' && !str_contains($coin, 'usd')) {
                 continue;
             }

@@ -1,7 +1,7 @@
 <?php
 
-use CrawlerCoinGecko\DexTracker;
-use CrawlerCoinGecko\Crawler;
+use DexCrawler\DexTracker;
+use DexCrawler\Crawler;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
