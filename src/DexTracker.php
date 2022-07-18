@@ -1,6 +1,6 @@
 <?php
 
-namespace CrawlerCoinGecko;
+namespace DexCrawler;
 
 use Exception;
 use Maknz\Slack\Attachment;
