@@ -49,7 +49,7 @@ EOF;
             $webDriverSelect->selectByIndex(3);
             sleep(1);
 
-            for ($i = 0; $i < 50; $i++) {
+            for ($i = 0; $i < 10; $i++) {
                 // $this->client->takeScreenshot('page' . $i . '.jpg');
                 $this->client->refreshCrawler();
                 $data = $this->getContent();
