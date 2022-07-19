@@ -1,14 +1,14 @@
 <?php
 
-use DexCrawler\DexTracker;
-use DexCrawler\Crawler;
+use DexCrawler\service\AlertService;
+use DexCrawler\service\CrawlerService;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 header("Content-Type: text/plain");
 
-$crawler = new Crawler();
-$dex = new DexTracker();
+$crawler = new CrawlerService();
+$dex = new AlertService();
 
 $crawler->invoke();
 $array = $crawler->getReturnCoins();
