@@ -2,6 +2,8 @@
 
 namespace DexCrawler;
 
+use DexCrawler\service\AlertService;
+use DexCrawler\service\CrawlerService;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Name;
 use DexCrawler\ValueObjects\Price;
@@ -36,6 +38,16 @@ class Factory
     ): WebDriverSelect
     {
         return new WebDriverSelect($element);
+    }
+
+    public static function createCrawlerService(): CrawlerService
+    {
+        return new CrawlerService();
+    }
+
+    public static function createAlert(): Alert
+    {
+        return new Alert();
     }
 
 }

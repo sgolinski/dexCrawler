@@ -19,13 +19,11 @@ use Symfony\Component\Panther\Client as PantherClient;
 class CrawlerService
 {
     private PantherClient $client;
-    public static $counter = 0;
     private array $returnCoins = [];
     private const URL = 'https://bscscan.com/dextracker?filter=1';
     private const URL_TOKEN = 'https://bscscan.com/token/';
     private const INDEX_OF_SHOWN_ROWS = 3;
-    private const NUMBER_OF_SITES_TO_DOWNLOAD = 50;
-
+    private const NUMBER_OF_SITES_TO_DOWNLOAD = 10;
 
     private const SCRIPT = <<<EOF
 var selectedA = document.querySelector('#selectDex');
@@ -42,9 +40,9 @@ EOF;
             echo "Start crawling " . date("F j, Y, g:i:s a") . PHP_EOL;
             $this->getCrawlerForWebsite(self::URL);
             $this->client->executeScript(self::SCRIPT);
-            $this->changeOnWebsiteToShowMoreRecords(self::INDEX_OF_SHOWN_ROWS);
+            $this->changeOnWebsiteToShowMoreRecords();
             sleep(1);
-            $this->scrappingData(self::NUMBER_OF_SITES_TO_DOWNLOAD);
+            $this->scrappingData();
             $this->logTimeIfEmptyCloseClient();
             $this->returnCoins = $this->proveIfIsWorthToBuyIt($this->returnCoins);
         } catch (Exception $exception) {
@@ -107,16 +105,7 @@ EOF;
         }
     }
 
-    public function getReturnCoins(): ?array
-    {
-        return $this->returnCoins;
-    }
-
-    public function __destruct()
-    {
-    }
-
-    public function proveIfIsWorthToBuyIt(
+    private function proveIfIsWorthToBuyIt(
         array $makers
     ): array
     {
@@ -150,12 +139,10 @@ EOF;
         return $uniqueMakers;
     }
 
-    public function scrappingData(
-        int $numberOfSitesToCollect
-    ): void
+    private function scrappingData(): void
     {
-        for ($i = 0; $i < $numberOfSitesToCollect; $i++) {
-           //$this->client->takeScreenshot('page' . $i . '.jpg');
+        for ($i = 0; $i < self::NUMBER_OF_SITES_TO_DOWNLOAD; $i++) {
+            //$this->client->takeScreenshot('page' . $i . '.jpg');
             $this->client->refreshCrawler();
             $data = $this->getContent();
             $this->assignMakerAndTakerFrom($data);
@@ -172,19 +159,17 @@ EOF;
      * @throws \Facebook\WebDriver\Exception\NoSuchElementException
      * @throws \Facebook\WebDriver\Exception\UnexpectedTagNameException
      */
-    public function changeOnWebsiteToShowMoreRecords(
-        int $index
-    ): void
+    private function changeOnWebsiteToShowMoreRecords(): void
     {
         $selectRows = $this->client->findElement(WebDriverBy::id('ContentPlaceHolder1_ddlRecordsPerPage'));
         $webDriverSelect = Factory::createWebDriverSelect($selectRows);
-        $webDriverSelect->selectByIndex($index);
+        $webDriverSelect->selectByIndex(self::INDEX_OF_SHOWN_ROWS);
     }
 
     /**
      * @return void
      */
-    public function logTimeIfEmptyCloseClient(): void
+    private function logTimeIfEmptyCloseClient(): void
     {
         echo count($this->returnCoins) . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
         if (empty($this->returnCoins)) {
@@ -197,7 +182,7 @@ EOF;
     /**
      * @return void
      */
-    public function getCrawlerForWebsite(
+    private function getCrawlerForWebsite(
         string $url
     ): void
     {
@@ -213,7 +198,7 @@ EOF;
      * @param bool $existed
      * @return bool
      */
-    public function returnUniqueArrayFrom(
+    private function returnUniqueArrayFrom(
         array $uniqueMakers,
         Maker $maker,
         bool  $existed
@@ -230,5 +215,13 @@ EOF;
         return $existed;
     }
 
+    public function getReturnCoins(): ?array
+    {
+        return $this->returnCoins;
+    }
+
+    public function __destruct()
+    {
+    }
 
 }

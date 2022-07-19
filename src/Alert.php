@@ -1,17 +1,16 @@
 <?php
 
-namespace DexCrawler\service;
-
+namespace DexCrawler;
 
 use DexCrawler\Maker;
 use Maknz\Slack\Client as SlackClient;
 use Maknz\Slack\Message;
 
-class AlertService
+class Alert
 {
     private SlackClient $slack;
 
-    private const HOOK = 'https://hooks.slack.com/service/T0315SMCKTK/B03160VKMED/hc0gaX0LIzVDzyJTOQQoEgUE';
+    private const HOOK = 'https://hooks.slack.com/services/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';
 
     public function __construct()
     {
@@ -28,7 +27,8 @@ class AlertService
         foreach ($makers as $maker) {
             assert($maker instanceof Maker);
             $message = new Message();
-            $message->setText($maker->alert());
+            $message->setText
+            ($maker->alert());
             $this->slack->sendMessage($message);
         }
         echo 'Sent alert about ' . count($makers) . ' tokens ' . date("F j, Y, g:i:s a") . PHP_EOL;

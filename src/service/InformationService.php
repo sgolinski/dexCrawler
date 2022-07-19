@@ -16,7 +16,9 @@ class InformationService
     {
         $this->ensureInformationIsNotNull($information);
         $this->information = explode(" ", $information);
+        $this->ensureInformationAboutPriceIsNotNull($this->information[0]);
         $this->price = $this->extractPriceFrom($this->information[0]);
+        $this->ensureInformationAboutTokenIsNotNull($this->information[1]);
         $this->token = $this->extractTokenFrom($this->information[1]);
     }
 
@@ -60,6 +62,20 @@ class InformationService
     ): string
     {
         return strtolower($data);
+    }
+
+    private function ensureInformationAboutPriceIsNotNull(mixed $int)
+    {
+        if ($int === null) {
+            throw new InvalidArgumentException('Information about price is missing');
+        }
+    }
+
+    private function ensureInformationAboutTokenIsNotNull(mixed $int)
+    {
+        if ($int === null) {
+            throw new InvalidArgumentException('Information about token is missing');
+        }
     }
 
 }

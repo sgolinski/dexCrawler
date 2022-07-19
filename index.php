@@ -1,22 +1,23 @@
 <?php
 
-use DexCrawler\service\AlertService;
+use DexCrawler\Factory;
+use DexCrawler\Alert;
 use DexCrawler\service\CrawlerService;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
 header("Content-Type: text/plain");
 
-$crawler = new CrawlerService();
-$dex = new AlertService();
+$crawler = Factory::createCrawlerService();
+$alertService = Factory::createAlert();
 
 $crawler->invoke();
-$array = $crawler->getReturnCoins();
-$crawler->__destruct();
 
-if ($array !== null) {
-    $dex->invoke($crawler->getReturnCoins());
+$markers = $crawler->getReturnCoins();
+
+if (!empty($markers)) {
+    $alertService->invoke($markers);
 } else {
-    unset($dex);
-    die('nothing to show');
+    unset($crawler);
+    die('Nothing to show ' . date("F j, Y, g:i:s a"));
 }
