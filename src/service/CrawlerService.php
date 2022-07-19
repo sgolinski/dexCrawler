@@ -24,7 +24,7 @@ class CrawlerService
     private const URL = 'https://bscscan.com/dextracker?filter=1';
     private const URL_TOKEN = 'https://bscscan.com/token/';
     private const INDEX_OF_SHOWN_ROWS = 3;
-    private const NUMBER_OF_SITES_TO_DOWNLOAD = 10;
+    private const NUMBER_OF_SITES_TO_DOWNLOAD = 50;
 
 
     private const SCRIPT = <<<EOF
