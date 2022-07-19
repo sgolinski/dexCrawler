@@ -1,7 +1,7 @@
 version: "3.7"
 
 networks:
-  dex_crawler:
+  dex_crawler_3:
     external: true
 
 services:
@@ -13,4 +13,4 @@ services:
       - ../:/mnt/app
     restart: always
     networks:
-      - dex_crawler
+      - dex_crawler_3
