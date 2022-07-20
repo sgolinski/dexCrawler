@@ -145,6 +145,7 @@ EOF;
         $uniqueMakers = [];
         foreach ($makers as $maker) {
             $existed = false;
+            $notEnoughHolders = false;
             assert($maker instanceof Maker);
             $url = self::URL_TOKEN . $maker->getAddress()->asString();
             $this->getCrawlerForWebsite($url);
@@ -158,12 +159,12 @@ EOF;
                 $maker->setHolders($holders);
 
             } catch (InvalidArgumentException $exception) {
-
+                $notEnoughHolders = true;
                 continue;
             }
             $existed = $this->returnUniqueArrayFrom($uniqueMakers, $maker, $existed);
 
-            if (!$existed) {
+            if (!$existed && !$notEnoughHolders) {
                 $uniqueMakers[] = $maker;
             }
         }
