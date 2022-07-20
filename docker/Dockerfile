@@ -48,7 +48,7 @@ RUN php composer install
 
 ##
 # list to proceed
-ADD /tokens_already_recorded.txt token_already_recorded.txt
+ADD /tokens_already_recorded.txt tokens_already_recorded.txt
 
 # copy a crontab file to the image
 COPY /crontab /etc/cron.d/crawler-job
