@@ -52,10 +52,9 @@ EOF;
             sleep(1);
             $this->scrappingData();
             $this->logTimeIfEmptyCloseClient();
+
             $this->newTokens = $this->proveIfIsWorthToBuyIt($this->newTokens);
             $this->returnCoins = array_merge($this->newTokens, $this->returnCoins);
-
-            $this->removeDuplicates();
 
             FileWriter::write(self::$recordedArray);
 

@@ -1,8 +1,6 @@
 <?php
 
 use DexCrawler\Factory;
-use DexCrawler\Alert;
-use DexCrawler\service\CrawlerService;
 
 require_once __DIR__ . '/vendor/autoload.php';
 

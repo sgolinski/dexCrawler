@@ -46,9 +46,9 @@ class Factory
         return new CrawlerService();
     }
 
-    public static function createAlert(): Alert
+    public static function createAlert(): AlertService
     {
-        return new Alert();
+        return new AlertService();
     }
 
 }

@@ -1,13 +1,13 @@
 <?php
 
-namespace DexCrawler;
+namespace DexCrawler\service;
 
 use DexCrawler\Maker;
 use DexCrawler\Writer\FileWriter;
 use Maknz\Slack\Client as SlackClient;
 use Maknz\Slack\Message;
 
-class Alert
+class AlertService
 {
     private SlackClient $slack;
 
@@ -29,9 +29,7 @@ class Alert
             assert($maker instanceof Maker);
             $message = new Message();
             $message->setText($maker->alert());
-            //$this->slack->sendMessage($message);
-            usleep(5000);
-            FileWriter::writeOne($maker->alert());
+            $this->slack->sendMessage($message);
         }
         echo 'Sent alert about ' . count($makers) . ' tokens ' . date("F j, Y, g:i:s a") . PHP_EOL;
     }
