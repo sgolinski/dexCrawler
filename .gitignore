@@ -1,6 +1,7 @@
 crontab
 docker/docker-compose.yaml
 docker/install-composer.sh
+docker/Dockerfile
 Makefile
 tokens_alerts.txt
 tokens_already_recorded_save.txt
