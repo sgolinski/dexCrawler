@@ -9,8 +9,6 @@ use DexCrawler\Reader\FileReader;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Holders;
 use DexCrawler\ValueObjects\Name;
-use DexCrawler\ValueObjects\Price;
-use DexCrawler\ValueObjects\Token;
 use DexCrawler\Writer\FileWriter;
 use Exception;
 use Facebook\WebDriver\Remote\RemoteWebElement;
@@ -41,7 +39,7 @@ EOF;
 
     public function __construct()
     {
-        self::$recordedArray = [];
+        self::$recordedArray = FileReader::read();
     }
 
     public function invoke()
@@ -54,14 +52,12 @@ EOF;
             sleep(1);
             $this->scrappingData();
             $this->logTimeIfEmptyCloseClient();
+            $this->newTokens = $this->proveIfIsWorthToBuyIt($this->newTokens);
+            $this->returnCoins = array_merge($this->newTokens, $this->returnCoins);
 
-            //   $recordedTokens = FileReader::read();
-            if (count($this->newTokens) > 0) {
-                $this->newTokens = $this->proveIfIsWorthToBuyIt($this->newTokens);
+            $this->removeDuplicates();
 
-            }
-
-            FileWriter::write($this->newTokens);
+            FileWriter::write(self::$recordedArray);
 
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
@@ -95,24 +91,28 @@ EOF;
             assert($webElement instanceof RemoteWebElement);
 
             try {
+
                 $information = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))
                     ->getText();
                 $service = InformationService::fromString($information);
 
-                $price = Price::fromFloat($service->getPriceAsFloatFromInformation());
-                $tokenNameOfTaker = Token::fromString($service->getTokenStringFromInformation());
+                $price = $service->getPrice();
+                $tokenNameOfTaker = $service->getToken();
                 $taker = Factory::createTaker($tokenNameOfTaker, $price,);
 
                 $name = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
                     ->getText();
                 $nameOfMaker = Name::fromString($name);
+
                 $currentTimestamp = time();
 
-                if ($this->checkIfRecordExistInRecordedArray($nameOfMaker) !== null) {
+
+                if (!empty(self::$recordedArray) && $this->checkIfRecordExistInRecordedArray($nameOfMaker) !== null) {
 
                     $updatedMaker = $this->checkIfRecordExistInRecordedArray($nameOfMaker);
+                    //                  var_dump($updatedMaker->getHolders()->asInt());
                     $this->checkIfIsNotToNew($updatedMaker, $currentTimestamp);
                     $updatedMaker->getTaker()->updateDropValue($price);
 
@@ -128,7 +128,7 @@ EOF;
                         ->getAttribute('href');
                     $makerAddress = Address::fromString($address);
                     $maker = Factory::createMaker($nameOfMaker, $makerAddress, $taker, $currentTimestamp);
-
+                    self::$recordedArray[] = $maker;
                     $this->newTokens[] = $maker;
                 }
             } catch (InvalidArgumentException) {
@@ -144,7 +144,6 @@ EOF;
         $uniqueMakers = [];
         foreach ($makers as $maker) {
             $existed = false;
-            var_dump($maker);
             assert($maker instanceof Maker);
             $url = self::URL_TOKEN . $maker->getAddress()->asString();
             $this->getCrawlerForWebsite($url);
@@ -167,7 +166,7 @@ EOF;
                 $uniqueMakers[] = $maker;
             }
         }
-        echo "Validation Finished  " . count($uniqueMakers) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
+        echo "Validation Finished  " . count($uniqueMakers) + count($this->returnCoins) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
         return $uniqueMakers;
     }
 
@@ -202,8 +201,8 @@ EOF;
      */
     private function logTimeIfEmptyCloseClient(): void
     {
-        echo count($this->returnCoins) . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
-        if (empty($this->returnCoins)) {
+        echo count($this->returnCoins) + count($this->newTokens) . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
+        if (empty($this->returnCoins) && empty($this->newTokens)) {
             $this->client->close();
             $this->client->quit();
             die();
@@ -239,11 +238,11 @@ EOF;
             foreach ($uniqueMakers as $uniqueMaker) {
                 assert($uniqueMaker instanceof Maker);
                 if ($maker->getName()->asString() === $uniqueMaker->getName()->asString()) {
-                    $existed = true;
+                    return true;
                 }
             }
         }
-        return $existed;
+        return false;
     }
 
     public function getReturnCoins(): ?array

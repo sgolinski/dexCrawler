@@ -1,5 +1,4 @@
 crontab
 docker/docker-compose.yaml
-docker/Dockerfile
 docker/install-composer.sh
 Makefile

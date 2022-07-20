@@ -2,19 +2,22 @@
 
 namespace DexCrawler\service;
 
+use DexCrawler\ValueObjects\Price;
+use DexCrawler\ValueObjects\Token;
 use InvalidArgumentException;
 
 class InformationService
 {
     public array $information;
-    public string $token;
-    public float $price;
+    public Token $token;
+    public Price $price;
 
     private function __construct(
         string $information
     )
     {
         $this->ensureInformationIsNotNull($information);
+        $this->ensureInformationAfterExplodeHasTwoEntry($information);
         $this->information = explode(" ", $information);
         $this->ensureInformationAboutPriceIsNotNull($this->information[0]);
         $this->price = $this->extractPriceFrom($this->information[0]);
@@ -38,30 +41,37 @@ class InformationService
         }
     }
 
-    public function getTokenStringFromInformation(): string
+    private function ensureInformationAfterExplodeHasTwoEntry(string $information): void
+    {
+        if (count(explode(" ", $information)) < 2) {
+            throw new InvalidArgumentException('Information data has not allowed format');
+        }
+    }
+
+    public function getToken(): Token
     {
         return $this->token;
     }
 
-    public function getPriceAsFloatFromInformation(): float
+    public function getPrice(): Price
     {
         return $this->price;
     }
 
     private function extractPriceFrom(
         string $float
-    ): float
+    ): Price
     {
         $strPrice = str_replace([','], [''], $float);
 
-        return round((float)$strPrice, 3);
+        return Price::fromFloat(round((float)$strPrice, 3));
     }
 
     private function extractTokenFrom(
         string $data
-    ): string
+    ): Token
     {
-        return strtolower($data);
+        return Token::fromString(strtolower($data));
     }
 
     private function ensureInformationAboutPriceIsNotNull(mixed $int)
