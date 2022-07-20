@@ -16,10 +16,11 @@ class Factory
     public static function createMaker(
         Name    $name,
         Address $address,
-        Taker   $taker
+        Taker   $taker,
+        int     $created
     ): Maker
     {
-        return new Maker($name, $address, $taker);
+        return new Maker($name, $address, $taker, $created);
     }
 
     public static function createTaker(

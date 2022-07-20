@@ -2,6 +2,7 @@
 
 namespace DexCrawler;
 
+use DateTime;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Holders;
 use DexCrawler\ValueObjects\Name;
@@ -14,16 +15,20 @@ class Maker
     private Holders $holders;
     private Taker $taker;
     private array $externalListingLinks;
+    private int $created;
 
     public function __construct(
-        Name    $name,
-        Address $address,
-        Taker   $taker)
+        Name     $name,
+        Address  $address,
+        Taker    $taker,
+        int $created
+    )
     {
         $this->ensureTokenNameIsNotBlacklisted($name->asString());
         $this->name = $name;
         $this->address = $address;
         $this->taker = $taker;
+        $this->created = $created;
         $this->setLinkToListings();
     }
 
@@ -99,6 +104,19 @@ class Maker
     ): string
     {
         return $this->externalListingLinks[$index];
+    }
+
+    /**
+     * @return int
+     */
+    public function getCreated(): int
+    {
+        return $this->created;
+    }
+
+    public function updateCreated(int $time)
+    {
+        $this->created = $time;
     }
 
 
