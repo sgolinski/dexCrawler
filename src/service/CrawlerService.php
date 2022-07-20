@@ -111,16 +111,19 @@ EOF;
                 if (!empty(self::$recordedArray) && $this->checkIfRecordExistInRecordedArray($nameOfMaker) !== null) {
 
                     $updatedMaker = $this->checkIfRecordExistInRecordedArray($nameOfMaker);
-                    //                  var_dump($updatedMaker->getHolders()->asInt());
-                    $this->checkIfIsNotToNew($updatedMaker, $currentTimestamp);
-                    $updatedMaker->getTaker()->updateDropValue($price);
+                    if ($updatedMaker->getHolders()->asInt() > 500) {
+                        //                  var_dump($updatedMaker->getHolders()->asInt());
+                        $this->checkIfIsNotToNew($updatedMaker, $currentTimestamp);
+                        $updatedMaker->getTaker()->updateDropValue($price);
 
-                    if ($this->checkIfIsNotToNew($updatedMaker, $currentTimestamp)) {
-                        $this->returnCoins[] = $updatedMaker;
+                        if ($this->checkIfIsNotToNew($updatedMaker, $currentTimestamp)) {
+                            $this->returnCoins[] = $updatedMaker;
+                        } else {
+                            continue;
+                        }
                     } else {
                         continue;
                     }
-
                 } else {
                     $address = $webElement
                         ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
