@@ -9,6 +9,7 @@ ENV PANTHER_CHROME_ARGUMENTS='--disable-dev-shm-usage'
 # needed php stuff
 COPY /opcache.ini /usr/local/etc/php/conf.d/
 
+
 RUN apk add libzip-dev libzip zip libxml2-dev \
     && docker-php-ext-install zip xml
 
@@ -46,7 +47,8 @@ ADD /composer.lock composer.lock
 RUN php composer install
 
 ##
-# cron stuff
+# list to proceed
+ADD /tokens_already_recorded.txt token_already_recorded.txt
 
 # copy a crontab file to the image
 COPY /crontab /etc/cron.d/crawler-job

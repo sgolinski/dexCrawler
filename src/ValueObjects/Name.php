@@ -20,7 +20,7 @@ class Name
         'milk2', 'axs', 'tarp', 'urus', 'gymnet', 'inj', 'zuck', 'bhf', 'doge', 'jpp', 'adog', 'arv', 'linux', 'kos', 'twep',
         'pols', 'mct', 'earn', 'fiu', 'opt', 'dx', 'fxdgp', 'web3', 'spin', 'kitty', 'bshare', 'dogedigger', 'pen', 'bit360',
         'lb', '11up', 'monstr', 'apedao', 'paint', 'amazingteam', 'mbd', 'cum', 'vgxt', 'dma', 'guard', 'rif', 'lblock',
-        'brise', 'rodeo', 'myra', 'prcy', 'dut', 'cls', 'yetic', 'usdc', 'busd', 'usdt', 'fusdt', 'usdp'
+        'brise', 'rodeo', 'myra', 'prcy', 'dut', 'cls', 'yetic', 'usdc', 'busd', 'usdt', 'fusdt', 'usdp', 'bsc-usd'
     ];
 
     public const ALLOWED_TAKER_TOKENS_NAMES = [

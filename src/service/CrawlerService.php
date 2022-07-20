@@ -5,11 +5,11 @@ namespace DexCrawler\service;
 use ArrayIterator;
 use DexCrawler\Factory;
 use DexCrawler\Maker;
+use DexCrawler\Reader\FileReader;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Holders;
 use DexCrawler\ValueObjects\Name;
-use DexCrawler\ValueObjects\Price;
-use DexCrawler\ValueObjects\Token;
+use DexCrawler\Writer\FileWriter;
 use Exception;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
@@ -19,12 +19,13 @@ use Symfony\Component\Panther\Client as PantherClient;
 class CrawlerService
 {
     private PantherClient $client;
-    public static $counter = 0;
     private array $returnCoins = [];
     private const URL = 'https://bscscan.com/dextracker?filter=1';
     private const URL_TOKEN = 'https://bscscan.com/token/';
     private const INDEX_OF_SHOWN_ROWS = 3;
     private const NUMBER_OF_SITES_TO_DOWNLOAD = 10;
+    public static $recordedArray;
+    public array $newTokens = [];
 
 
     private const SCRIPT = <<<EOF
@@ -36,17 +37,27 @@ selectedA.click();
 divWithDexList.querySelector('#selectDexButton > a:nth-child(5) > img').click();
 EOF;
 
+    public function __construct()
+    {
+        self::$recordedArray = FileReader::read();
+    }
+
     public function invoke()
     {
         try {
             echo "Start crawling " . date("F j, Y, g:i:s a") . PHP_EOL;
             $this->getCrawlerForWebsite(self::URL);
             $this->client->executeScript(self::SCRIPT);
-            $this->changeOnWebsiteToShowMoreRecords(self::INDEX_OF_SHOWN_ROWS);
+            $this->changeOnWebsiteToShowMoreRecords();
             sleep(1);
-            $this->scrappingData(self::NUMBER_OF_SITES_TO_DOWNLOAD);
+            $this->scrappingData();
             $this->logTimeIfEmptyCloseClient();
-            $this->returnCoins = $this->proveIfIsWorthToBuyIt($this->returnCoins);
+
+            $this->newTokens = $this->proveIfIsWorthToBuyIt($this->newTokens);
+            $this->returnCoins = array_merge($this->newTokens, $this->returnCoins);
+
+            FileWriter::write(self::$recordedArray);
+
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
         } finally {
@@ -79,13 +90,14 @@ EOF;
             assert($webElement instanceof RemoteWebElement);
 
             try {
+
                 $information = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))
                     ->getText();
                 $service = InformationService::fromString($information);
 
-                $price = Price::fromFloat($service->getPriceAsFloatFromInformation());
-                $tokenNameOfTaker = Token::fromString($service->getTokenStringFromInformation());
+                $price = $service->getPrice();
+                $tokenNameOfTaker = $service->getToken();
                 $taker = Factory::createTaker($tokenNameOfTaker, $price,);
 
                 $name = $webElement
@@ -93,37 +105,44 @@ EOF;
                     ->getText();
                 $nameOfMaker = Name::fromString($name);
 
-                $address = $webElement
-                    ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
-                    ->getAttribute('href');
-                $makerAddress = Address::fromString($address);
+                $currentTimestamp = time();
 
-                $maker = Factory::createMaker($nameOfMaker, $makerAddress, $taker);
-                $this->returnCoins[] = $maker;
 
+                if (!empty(self::$recordedArray) && $this->checkIfRecordExistInRecordedArray($nameOfMaker) !== null) {
+
+                    $updatedMaker = $this->checkIfRecordExistInRecordedArray($nameOfMaker);
+                    //                  var_dump($updatedMaker->getHolders()->asInt());
+                    $this->checkIfIsNotToNew($updatedMaker, $currentTimestamp);
+                    $updatedMaker->getTaker()->updateDropValue($price);
+
+                    if ($this->checkIfIsNotToNew($updatedMaker, $currentTimestamp)) {
+                        $this->returnCoins[] = $updatedMaker;
+                    } else {
+                        continue;
+                    }
+
+                } else {
+                    $address = $webElement
+                        ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
+                        ->getAttribute('href');
+                    $makerAddress = Address::fromString($address);
+                    $maker = Factory::createMaker($nameOfMaker, $makerAddress, $taker, $currentTimestamp);
+                    self::$recordedArray[] = $maker;
+                    $this->newTokens[] = $maker;
+                }
             } catch (InvalidArgumentException) {
                 continue;
             }
         }
     }
 
-    public function getReturnCoins(): ?array
-    {
-        return $this->returnCoins;
-    }
-
-    public function __destruct()
-    {
-    }
-
-    public function proveIfIsWorthToBuyIt(
+    private function proveIfIsWorthToBuyIt(
         array $makers
     ): array
     {
         $uniqueMakers = [];
         foreach ($makers as $maker) {
             $existed = false;
-
             assert($maker instanceof Maker);
             $url = self::URL_TOKEN . $maker->getAddress()->asString();
             $this->getCrawlerForWebsite($url);
@@ -146,16 +165,13 @@ EOF;
                 $uniqueMakers[] = $maker;
             }
         }
-        echo "Validation Finished  " . count($uniqueMakers) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
+        echo "Validation Finished  " . count($uniqueMakers) + count($this->returnCoins) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
         return $uniqueMakers;
     }
 
-    public function scrappingData(
-        int $numberOfSitesToCollect
-    ): void
+    private function scrappingData(): void
     {
-        for ($i = 0; $i < $numberOfSitesToCollect; $i++) {
-           //$this->client->takeScreenshot('page' . $i . '.jpg');
+        for ($i = 0; $i < self::NUMBER_OF_SITES_TO_DOWNLOAD; $i++) {
             $this->client->refreshCrawler();
             $data = $this->getContent();
             $this->assignMakerAndTakerFrom($data);
@@ -172,22 +188,20 @@ EOF;
      * @throws \Facebook\WebDriver\Exception\NoSuchElementException
      * @throws \Facebook\WebDriver\Exception\UnexpectedTagNameException
      */
-    public function changeOnWebsiteToShowMoreRecords(
-        int $index
-    ): void
+    private function changeOnWebsiteToShowMoreRecords(): void
     {
         $selectRows = $this->client->findElement(WebDriverBy::id('ContentPlaceHolder1_ddlRecordsPerPage'));
         $webDriverSelect = Factory::createWebDriverSelect($selectRows);
-        $webDriverSelect->selectByIndex($index);
+        $webDriverSelect->selectByIndex(self::INDEX_OF_SHOWN_ROWS);
     }
 
     /**
      * @return void
      */
-    public function logTimeIfEmptyCloseClient(): void
+    private function logTimeIfEmptyCloseClient(): void
     {
-        echo count($this->returnCoins) . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
-        if (empty($this->returnCoins)) {
+        echo count($this->returnCoins) + count($this->newTokens) . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
+        if (empty($this->returnCoins) && empty($this->newTokens)) {
             $this->client->close();
             $this->client->quit();
             die();
@@ -197,7 +211,7 @@ EOF;
     /**
      * @return void
      */
-    public function getCrawlerForWebsite(
+    private function getCrawlerForWebsite(
         string $url
     ): void
     {
@@ -213,7 +227,7 @@ EOF;
      * @param bool $existed
      * @return bool
      */
-    public function returnUniqueArrayFrom(
+    private function returnUniqueArrayFrom(
         array $uniqueMakers,
         Maker $maker,
         bool  $existed
@@ -223,12 +237,41 @@ EOF;
             foreach ($uniqueMakers as $uniqueMaker) {
                 assert($uniqueMaker instanceof Maker);
                 if ($maker->getName()->asString() === $uniqueMaker->getName()->asString()) {
-                    $existed = true;
+                    return true;
                 }
             }
         }
-        return $existed;
+        return false;
     }
 
+    public function getReturnCoins(): ?array
+    {
+        return $this->returnCoins;
+    }
+
+    public function __destruct()
+    {
+    }
+
+    public function checkIfRecordExistInRecordedArray(Name $name): ?Maker
+    {
+        foreach (self::$recordedArray as $maker) {
+            assert($maker instanceof Maker);
+            if ($maker->getName()->asString() === $name->asString()) {
+                return $maker;
+            }
+        }
+        return null;
+    }
+
+    private function checkIfIsNotToNew(Maker $updatedMaker, int $currentTimestamp): bool
+    {
+        if ($currentTimestamp - $updatedMaker->getCreated() < 3600) {
+            $updatedMaker->updateCreated($currentTimestamp);
+            return true;
+        }
+        $updatedMaker->updateCreated($currentTimestamp);
+        return false;
+    }
 
 }

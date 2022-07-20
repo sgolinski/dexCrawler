@@ -2,8 +2,8 @@
 
 namespace DexCrawler\service;
 
-
 use DexCrawler\Maker;
+use DexCrawler\Writer\FileWriter;
 use Maknz\Slack\Client as SlackClient;
 use Maknz\Slack\Message;
 
@@ -11,7 +11,7 @@ class AlertService
 {
     private SlackClient $slack;
 
-    private const HOOK = 'https://hooks.slack.com/service/T0315SMCKTK/B03160VKMED/hc0gaX0LIzVDzyJTOQQoEgUE';
+    private const HOOK = 'https://hooks.slack.com/services/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';
 
     public function __construct()
     {

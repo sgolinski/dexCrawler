@@ -69,4 +69,10 @@ class Taker
         return $this->dropValue;
     }
 
+    public function updateDropValue(Price $dropValue): void
+    {
+        $this->dropValue = $dropValue;
+    }
+
+
 }

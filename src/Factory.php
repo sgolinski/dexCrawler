@@ -2,6 +2,8 @@
 
 namespace DexCrawler;
 
+use DexCrawler\service\AlertService;
+use DexCrawler\service\CrawlerService;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Name;
 use DexCrawler\ValueObjects\Price;
@@ -14,10 +16,11 @@ class Factory
     public static function createMaker(
         Name    $name,
         Address $address,
-        Taker   $taker
+        Taker   $taker,
+        int     $created
     ): Maker
     {
-        return new Maker($name, $address, $taker);
+        return new Maker($name, $address, $taker, $created);
     }
 
     public static function createTaker(
@@ -36,6 +39,16 @@ class Factory
     ): WebDriverSelect
     {
         return new WebDriverSelect($element);
+    }
+
+    public static function createCrawlerService(): CrawlerService
+    {
+        return new CrawlerService();
+    }
+
+    public static function createAlert(): AlertService
+    {
+        return new AlertService();
     }
 
 }
