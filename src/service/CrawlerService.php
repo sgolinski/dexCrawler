@@ -112,7 +112,6 @@ EOF;
 
                     $updatedMaker = $this->checkIfRecordExistInRecordedArray($nameOfMaker);
                     if ($updatedMaker->getHolders()->asInt() > 500) {
-                        //                  var_dump($updatedMaker->getHolders()->asInt());
                         $this->checkIfIsNotToNew($updatedMaker, $currentTimestamp);
                         $updatedMaker->getTaker()->updateDropValue($price);
 
