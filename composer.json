@@ -15,9 +15,7 @@
         "symfony/panther": "^2.0",
         "symfony/css-selector": "^6.0",
         "php-webdriver/webdriver": "^1.12",
-      "ext-pdo": "*",
-        "ext-mysqli": "*",
-      "ext-curl": "*",
+        "ext-curl": "*",
         "ci/restclientbundle": "^2.0"
     }
 }

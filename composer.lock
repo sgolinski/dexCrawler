@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "802575c9f532b7aaed5994252647de60",
+    "content-hash": "51b53a51abf4c6e1445faca10f79a393",
     "packages": [
         {
             "name": "ci/restclientbundle",
@@ -1997,8 +1997,6 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "ext-pdo": "*",
-        "ext-mysqli": "*",
         "ext-curl": "*"
     },
     "platform-dev": [],
