@@ -18,12 +18,13 @@ use Symfony\Component\Panther\Client as PantherClient;
 
 class CrawlerService
 {
+    public static $counter = 0;
     private PantherClient $client;
     private array $returnCoins = [];
     private const URL = 'https://bscscan.com/dextracker?filter=1';
     private const URL_TOKEN = 'https://bscscan.com/token/';
     private const INDEX_OF_SHOWN_ROWS = 3;
-    private const NUMBER_OF_SITES_TO_DOWNLOAD = 10;
+    private const NUMBER_OF_SITES_TO_DOWNLOAD = 20;
     public static array $recordedArray;
     public array $newTokens = [];
 
@@ -39,6 +40,7 @@ EOF;
 
     public function __construct()
     {
+
         self::$recordedArray = FileReader::read();
     }
 
@@ -87,15 +89,15 @@ EOF;
     {
 
         foreach ($content as $webElement) {
-            assert($webElement instanceof RemoteWebElement);
-
             try {
+                $updatedMaker = null;
 
+                assert($webElement instanceof RemoteWebElement);
                 $information = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))
                     ->getText();
-                $service = InformationService::fromString($information);
 
+                $service = InformationService::fromString($information);
                 $price = $service->getPrice();
                 $tokenNameOfTaker = $service->getToken();
                 $taker = Factory::createTaker($tokenNameOfTaker, $price,);
@@ -103,26 +105,22 @@ EOF;
                 $name = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
                     ->getText();
-                $nameOfMaker = Name::fromString($name);
 
+                $nameOfMaker = Name::fromString($name);
                 $currentTimestamp = time();
 
-
                 if (!empty(self::$recordedArray) && $this->checkIfRecordExistInRecordedArray($nameOfMaker) !== null) {
-
                     $updatedMaker = $this->checkIfRecordExistInRecordedArray($nameOfMaker);
-                    if ($updatedMaker->getHolders()->asInt() > 500) {
-                        $this->checkIfIsNotToNew($updatedMaker, $currentTimestamp);
-                        $updatedMaker->getTaker()->updateDropValue($price);
-
-                        if ($this->checkIfIsNotToNew($updatedMaker, $currentTimestamp)) {
-                            $this->returnCoins[] = $updatedMaker;
-                        } else {
-                            continue;
-                        }
-                    } else {
-                        continue;
+                    if ($updatedMaker->holders === null) {
+                        $this->removeFromListOfSavedMakers($nameOfMaker);
+                        $updatedMaker = null;
                     }
+                }
+
+                if ($updatedMaker !== null) {
+                    $updatedMaker->updateCreated($currentTimestamp);
+                    $this->returnCoins[] = $updatedMaker;
+
                 } else {
                     $address = $webElement
                         ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
@@ -132,40 +130,46 @@ EOF;
                     self::$recordedArray[] = $maker;
                     $this->newTokens[] = $maker;
                 }
-            } catch (InvalidArgumentException) {
+            } catch (InvalidArgumentException $exception) {
                 continue;
             }
         }
     }
 
-    private function proveIfIsWorthToBuyIt(
+    public function proveIfIsWorthToBuyIt(
         array $makers
     ): array
     {
         $uniqueMakers = [];
+        $existed = false;
+
         foreach ($makers as $maker) {
-            $existed = false;
-            $notEnoughHolders = false;
-            assert($maker instanceof Maker);
-            $url = self::URL_TOKEN . $maker->getAddress()->asString();
-            $this->getCrawlerForWebsite($url);
-            $holdersString = $this->client->getCrawler()
-                ->filter('#ContentPlaceHolder1_tr_tokenHolders > div > div.col-md-8 > div > div')
-                ->getText();
 
             try {
-                $holdersNumber = (int)str_replace(',', "", explode(' ', $holdersString)[0]);
-                $holders = Holders::fromInt($holdersNumber);
-                $maker->setHolders($holders);
+                assert($maker instanceof Maker);
+                $url = self::URL_TOKEN . $maker->getAddress()->asString();
+                $this->getCrawlerForWebsite($url);
+                $holdersString = $this->client->getCrawler()
+                    ->filter('#ContentPlaceHolder1_tr_tokenHolders > div > div.col-md-8 > div > div')
+                    ->getText();
 
-            } catch (InvalidArgumentException $exception) {
-                $notEnoughHolders = true;
+                try {
+                    $holdersNumber = (int)str_replace(',', "", explode(' ', $holdersString)[0]);
+                    $holders = Holders::fromInt($holdersNumber);
+                    $maker->setHolders($holders);
+                } catch (InvalidArgumentException $exception) {
+                    continue;
+                }
+                $existed = $this->returnUniqueArrayFrom($uniqueMakers, $maker, $existed);
+
+                if (!$existed) {
+                    $uniqueMakers[] = $maker;
+                }
+
+                $existed = false;
+            } catch
+            (InvalidArgumentException $e) {
                 continue;
-            }
-            $existed = $this->returnUniqueArrayFrom($uniqueMakers, $maker, $existed);
-
-            if (!$existed && !$notEnoughHolders) {
-                $uniqueMakers[] = $maker;
             }
         }
         echo "Validation Finished  " . count($uniqueMakers) + count($this->returnCoins) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
@@ -258,9 +262,17 @@ EOF;
 
     public function checkIfRecordExistInRecordedArray(Name $name): ?Maker
     {
+        if ($name === null) {
+            return null;
+        } else {
+            $name = $name->asString();
+        }
         foreach (self::$recordedArray as $maker) {
+            if ($maker === null) {
+                continue;
+            }
             assert($maker instanceof Maker);
-            if ($maker->getName()->asString() === $name->asString()) {
+            if ($maker->getName()->asString() === $name) {
                 return $maker;
             }
         }
@@ -275,6 +287,20 @@ EOF;
         }
         $updatedMaker->updateCreated($currentTimestamp);
         return false;
+    }
+
+    private function removeFromListOfSavedMakers(Name $name)
+    {
+        for ($i = 0; $i <= count(self::$recordedArray); $i++) {
+            if (!isset(self::$recordedArray[$i])) {
+                continue;
+            }
+            assert(self::$recordedArray[$i] instanceof Maker);
+            if (self::$recordedArray[$i]->getName()->asString() === $name->asString()) {
+                self::$recordedArray[$i] = null;
+            }
+        }
+        self::$recordedArray = array_filter(self::$recordedArray);
     }
 
 }

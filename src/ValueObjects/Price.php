@@ -4,7 +4,7 @@ namespace DexCrawler\ValueObjects;
 
 class Price
 {
-    private float $price;
+    public float $price;
 
     private function __construct(
         float $price

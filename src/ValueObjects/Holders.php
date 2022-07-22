@@ -4,16 +4,16 @@ namespace DexCrawler\ValueObjects;
 
 class Holders
 {
-    private float $numOfHolders;
+    public int $holders = 0;
 
     private const MIN_NUM_OF_HOLDERS = 500;
 
     private function __construct(
-        int $numOfHolders
+        int $holders
     )
     {
-        $this->ensureNumberOfHoldersIsBiggerThen($numOfHolders);
-        $this->numOfHolders = $numOfHolders;
+        $this->ensureNumberOfHoldersIsBiggerThen($holders);
+        $this->holders = $holders;
     }
 
     public static function fromInt(
@@ -25,14 +25,14 @@ class Holders
 
     public function asInt(): int
     {
-        return $this->numOfHolders;
+        return $this->holders;
     }
 
     private function ensureNumberOfHoldersIsBiggerThen(
-        int $numberOfHolders
+        int $holders
     ): void
     {
-        if ($numberOfHolders < self::MIN_NUM_OF_HOLDERS) {
+        if ($holders < self::MIN_NUM_OF_HOLDERS) {
             throw new \InvalidArgumentException('Expected number of holders it to low');
         }
     }

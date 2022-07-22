@@ -4,7 +4,7 @@ namespace DexCrawler\ValueObjects;
 
 class Name
 {
-    private string $name;
+    public string $name;
 
     public const BLACKLISTED_NAMES = [
         'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka',

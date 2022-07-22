@@ -4,7 +4,7 @@ namespace DexCrawler\ValueObjects;
 
 class Address
 {
-    private string $address;
+    public string $address;
 
     private function __construct(
         string $address

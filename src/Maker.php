@@ -10,18 +10,18 @@ use InvalidArgumentException;
 
 class Maker
 {
-    private Name $name;
-    private Address $address;
-    private Holders $holders;
-    private Taker $taker;
-    private array $externalListingLinks;
-    private int $created;
+    public Name $name;
+    public Address $address;
+    public ?Holders $holders;
+    public Taker $taker;
+    public array $externalListingLinks;
+    public int $created;
 
     public function __construct(
-        Name     $name,
-        Address  $address,
-        Taker    $taker,
-        int $created
+        Name    $name,
+        Address $address,
+        Taker   $taker,
+        int     $created
     )
     {
         $this->ensureTokenNameIsNotBlacklisted($name->asString());
@@ -29,10 +29,11 @@ class Maker
         $this->address = $address;
         $this->taker = $taker;
         $this->created = $created;
+        $this->holders = null;
         $this->setLinkToListings();
     }
 
-    private function ensureTokenNameIsNotBlacklisted(
+    public function ensureTokenNameIsNotBlacklisted(
         string $name
     ): void
     {
@@ -118,6 +119,5 @@ class Maker
     {
         $this->created = $time;
     }
-
 
 }

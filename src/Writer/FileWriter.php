@@ -14,4 +14,6 @@ class FileWriter implements Writer
     {
         file_put_contents('tokens_alerts.txt', $alert . PHP_EOL, FILE_APPEND);
     }
+
+
 }

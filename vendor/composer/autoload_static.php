@@ -7,13 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
 {
     public static $files = array (
-        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
-        'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
-        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '2a3c2110e8e0295330dc3d11a4cbc4cb' => __DIR__ . '/..' . '/php-webdriver/webdriver/lib/Exception/TimeoutException.php',
     );
 
@@ -25,37 +22,31 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
             'Symfony\\Contracts\\Service\\' => 26,
             'Symfony\\Contracts\\HttpClient\\' => 29,
             'Symfony\\Contracts\\EventDispatcher\\' => 34,
+            'Symfony\\Component\\Yaml\\' => 23,
             'Symfony\\Component\\VarDumper\\' => 28,
             'Symfony\\Component\\Process\\' => 26,
             'Symfony\\Component\\Panther\\' => 26,
             'Symfony\\Component\\HttpKernel\\' => 29,
             'Symfony\\Component\\HttpFoundation\\' => 33,
             'Symfony\\Component\\HttpClient\\' => 29,
+            'Symfony\\Component\\Filesystem\\' => 29,
             'Symfony\\Component\\EventDispatcher\\' => 34,
             'Symfony\\Component\\ErrorHandler\\' => 31,
             'Symfony\\Component\\DomCrawler\\' => 29,
             'Symfony\\Component\\DependencyInjection\\' => 38,
             'Symfony\\Component\\CssSelector\\' => 30,
+            'Symfony\\Component\\Config\\' => 25,
             'Symfony\\Component\\BrowserKit\\' => 29,
         ),
         'P' => 
         array (
             'Psr\\Log\\' => 8,
-            'Psr\\Http\\Message\\' => 17,
-            'Psr\\Http\\Client\\' => 16,
             'Psr\\EventDispatcher\\' => 20,
             'Psr\\Container\\' => 14,
         ),
         'M' => 
         array (
             'Masterminds\\' => 12,
-            'Maknz\\Slack\\' => 12,
-        ),
-        'G' => 
-        array (
-            'GuzzleHttp\\Psr7\\' => 16,
-            'GuzzleHttp\\Promise\\' => 19,
-            'GuzzleHttp\\' => 11,
         ),
         'F' => 
         array (
@@ -88,6 +79,10 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
         array (
             0 => __DIR__ . '/..' . '/symfony/event-dispatcher-contracts',
         ),
+        'Symfony\\Component\\Yaml\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/yaml',
+        ),
         'Symfony\\Component\\VarDumper\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/var-dumper',
@@ -112,6 +107,10 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
         array (
             0 => __DIR__ . '/..' . '/symfony/http-client',
         ),
+        'Symfony\\Component\\Filesystem\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/filesystem',
+        ),
         'Symfony\\Component\\EventDispatcher\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/event-dispatcher',
@@ -132,6 +131,10 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
         array (
             0 => __DIR__ . '/..' . '/symfony/css-selector',
         ),
+        'Symfony\\Component\\Config\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/config',
+        ),
         'Symfony\\Component\\BrowserKit\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/browser-kit',
@@ -139,15 +142,6 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
         'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',
-        ),
-        'Psr\\Http\\Message\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
-        ),
-        'Psr\\Http\\Client\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-client/src',
         ),
         'Psr\\EventDispatcher\\' => 
         array (
@@ -161,22 +155,6 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
         ),
-        'Maknz\\Slack\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/alek13/slack/src',
-        ),
-        'GuzzleHttp\\Psr7\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
-        ),
-        'GuzzleHttp\\Promise\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
-        ),
-        'GuzzleHttp\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
-        ),
         'Facebook\\WebDriver\\' => 
         array (
             0 => __DIR__ . '/..' . '/php-webdriver/webdriver/lib',
@@ -184,6 +162,16 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
         'DexCrawler\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
+        ),
+    );
+
+    public static $prefixesPsr0 = array (
+        'C' => 
+        array (
+            'Circle\\RestClientBundle' => 
+            array (
+                0 => __DIR__ . '/..' . '/ci/restclientbundle',
+            ),
         ),
     );
 
@@ -196,6 +184,7 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97::$classMap;
 
         }, null, ClassLoader::class);

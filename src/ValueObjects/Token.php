@@ -4,7 +4,7 @@ namespace DexCrawler\ValueObjects;
 
 class Token
 {
-    private string $token;
+    public string $token;
 
     private function __construct(
         string $token
