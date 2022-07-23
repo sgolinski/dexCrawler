@@ -30,7 +30,7 @@ class Crawler
 
     private const INDEX_OF_SHOWN_ROWS = 3;
 
-    private const NUMBER_OF_SITES_TO_DOWNLOAD = 40;
+    private const NUMBER_OF_SITES_TO_DOWNLOAD = 5;
 
     public static array $recordedArray;
 
@@ -49,7 +49,7 @@ EOF;
     public function __construct()
     {
 
-        self::$recordedArray = FileReader::read();
+        self::$recordedArray = [];
     }
 
     public function invoke(): void
