@@ -1,10 +1,10 @@
 <?php
 
-namespace DexCrawler;
+namespace DexCrawler\Entity;
 
 use DexCrawler\ValueObjects\Name;
-use DexCrawler\ValueObjects\Token;
 use DexCrawler\ValueObjects\Price;
+use DexCrawler\ValueObjects\Token;
 use InvalidArgumentException;
 
 class Taker

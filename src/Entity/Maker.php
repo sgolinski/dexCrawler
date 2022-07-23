@@ -1,8 +1,7 @@
 <?php
 
-namespace DexCrawler;
+namespace DexCrawler\Entity;
 
-use DateTime;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Holders;
 use DexCrawler\ValueObjects\Name;

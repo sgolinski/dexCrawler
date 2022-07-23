@@ -2,8 +2,10 @@
 
 namespace DexCrawler;
 
-use DexCrawler\service\AlertService;
-use DexCrawler\service\CrawlerService;
+use DexCrawler\Entity\Maker;
+use DexCrawler\Entity\Taker;
+use DexCrawler\Service\Alert;
+use DexCrawler\Service\Crawler;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Name;
 use DexCrawler\ValueObjects\Price;
@@ -41,14 +43,14 @@ class Factory
         return new WebDriverSelect($element);
     }
 
-    public static function createCrawlerService(): CrawlerService
+    public static function createCrawlerService(): Crawler
     {
-        return new CrawlerService();
+        return new Crawler();
     }
 
-    public static function createAlert(): AlertService
+    public static function createAlert(): Alert
     {
-        return new AlertService();
+        return new Alert();
     }
 
 }

@@ -1,9 +1,9 @@
 <?php
 
-namespace DexCrawler\service;
+namespace DexCrawler\Service;
 
 
-class AlertService
+class Alert
 {
     public function invoke(array $tokens): void
     {

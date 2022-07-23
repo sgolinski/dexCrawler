@@ -1,10 +1,7 @@
 <?php
 
-use DexCrawler\Factory;
-use DexCrawler\Maker;
+use DexCrawler\Entity\Maker;
 use DexCrawler\Reader\FileReader;
-use DexCrawler\service\CrawlerService;
-use DexCrawler\Writer\FileWriter;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -28,7 +25,7 @@ try {
 $array = FileReader::read();
 
 
-//$crawler = new CrawlerService();
+//$crawler = new Crawler();
 //
 //$arrayWithHolders = $crawler->proveIfIsWorthToBuyIt($array);
 //

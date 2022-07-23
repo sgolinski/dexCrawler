@@ -1,12 +1,12 @@
 <?php
 
-namespace DexCrawler\service;
+namespace DexCrawler\Service;
 
 use DexCrawler\ValueObjects\Price;
 use DexCrawler\ValueObjects\Token;
 use InvalidArgumentException;
 
-class InformationService
+class Information
 {
     public array $information;
     public Token $token;

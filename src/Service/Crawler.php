@@ -1,10 +1,10 @@
 <?php
 
-namespace DexCrawler\service;
+namespace DexCrawler\Service;
 
 use ArrayIterator;
+use DexCrawler\Entity\Maker;
 use DexCrawler\Factory;
-use DexCrawler\Maker;
 use DexCrawler\Reader\FileReader;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Holders;
@@ -16,16 +16,24 @@ use Facebook\WebDriver\WebDriverBy;
 use InvalidArgumentException;
 use Symfony\Component\Panther\Client as PantherClient;
 
-class CrawlerService
+class Crawler
 {
     public static $counter = 0;
+
     private PantherClient $client;
+
     private array $returnCoins = [];
+
     private const URL = 'https://bscscan.com/dextracker?filter=1';
+
     private const URL_TOKEN = 'https://bscscan.com/token/';
+
     private const INDEX_OF_SHOWN_ROWS = 3;
+
     private const NUMBER_OF_SITES_TO_DOWNLOAD = 40;
+
     public static array $recordedArray;
+
     public array $newTokens = [];
 
 
@@ -44,7 +52,7 @@ EOF;
         self::$recordedArray = FileReader::read();
     }
 
-    public function invoke()
+    public function invoke(): void
     {
         try {
             echo "Start crawling " . date("F j, Y, g:i:s a") . PHP_EOL;
@@ -97,7 +105,7 @@ EOF;
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))
                     ->getText();
 
-                $service = InformationService::fromString($information);
+                $service = Information::fromString($information);
                 $price = $service->getPrice();
                 $tokenNameOfTaker = $service->getToken();
                 $taker = Factory::createTaker($tokenNameOfTaker, $price,);
@@ -202,9 +210,6 @@ EOF;
         $webDriverSelect->selectByIndex(self::INDEX_OF_SHOWN_ROWS);
     }
 
-    /**
-     * @return void
-     */
     private function logTimeIfEmptyCloseClient(): void
     {
         echo count($this->returnCoins) + count($this->newTokens) . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
@@ -215,9 +220,6 @@ EOF;
         }
     }
 
-    /**
-     * @return void
-     */
     private function getCrawlerForWebsite(
         string $url
     ): void
@@ -228,12 +230,6 @@ EOF;
         $this->client->refreshCrawler();
     }
 
-    /**
-     * @param array $uniqueMakers
-     * @param Maker $maker
-     * @param bool $existed
-     * @return bool
-     */
     private function returnUniqueArrayFrom(
         array $uniqueMakers,
         Maker $maker,
