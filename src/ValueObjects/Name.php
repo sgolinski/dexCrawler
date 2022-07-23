@@ -34,6 +34,7 @@ class Name
 
     private function __construct(
         string $name
+
     )
     {
         $name = $this->ensureIsLowerLetter($name);
