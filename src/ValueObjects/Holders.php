@@ -6,6 +6,8 @@ class Holders
 {
     public int $holders = 0;
 
+    private const MIN_NUM_OF_HOLDERS = 500;
+
     private function __construct(
         int $holders
     )
@@ -26,4 +28,12 @@ class Holders
         return $this->holders;
     }
 
+    private function ensureNumberOfHoldersIsBiggerThen(
+        int $holders
+    ): void
+    {
+        if ($holders < self::MIN_NUM_OF_HOLDERS) {
+            throw new \InvalidArgumentException('Expected number of holders it to low');
+        }
+    }
 }
