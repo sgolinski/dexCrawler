@@ -20,8 +20,13 @@ class Name
         'milk2', 'axs', 'tarp', 'urus', 'gymnet', 'inj', 'zuck', 'bhf', 'doge', 'jpp', 'adog', 'arv', 'linux', 'kos', 'twep',
         'pols', 'mct', 'earn', 'fiu', 'opt', 'dx', 'fxdgp', 'web3', 'spin', 'kitty', 'bshare', 'dogedigger', 'pen', 'bit360',
         'lb', '11up', 'monstr', 'apedao', 'paint', 'amazingteam', 'mbd', 'cum', 'vgxt', 'dma', 'guard', 'rif', 'lblock',
-        'brise', 'rodeo', 'myra', 'prcy', 'dut', 'cls', 'yetic', 'usdc', 'busd', 'usdt', 'fusdt', 'usdp', 'bsc-usd'
+        'brise', 'rodeo', 'myra', 'prcy', 'dut', 'cls', 'yetic', 'usdc', 'busd', 'usdt', 'fusdt', 'usdp', 'bsc-usd',
+        'wnk', 'usdex', 'trx', 'teddy', 'tcg2', 'stg', 'run', 'rmai', 'rgn', 'quint', 'qmall', 'peecat', 'ninky', 'mxm', 'moov',
+        'moon', 'mix', 'minecraft', 'mifi', 'mfx', 'luca', 'lovely', 'gst', 'gold', 'gmt', 'fil', 'doxy', 'dome', 'difx',
+        'chess', 'cate', 'btt', 'bnx', 'blst', 'bbox', 'azy','',
+
     ];
+
 
     public const ALLOWED_TAKER_TOKENS_NAMES = [
         'wbnb', 'cake', 'bnb', 'usdc', 'busd', 'usdt', 'fusdt', 'usdp'
