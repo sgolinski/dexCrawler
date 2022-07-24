@@ -11,6 +11,9 @@ use DexCrawler\ValueObjects\Holders;
 use DexCrawler\ValueObjects\Name;
 use DexCrawler\Writer\RedisWriter;
 use Exception;
+use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Exception\UnexpectedTagNameException;
+use Facebook\WebDriver\Exception\WebDriverCurlException;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use InvalidArgumentException;
@@ -18,11 +21,7 @@ use Symfony\Component\Panther\Client as PantherClient;
 
 class Crawler
 {
-    public static $counter = 0;
-
     private PantherClient $client;
-
-    private array $returnCoins = [];
 
     private const URL = 'https://bscscan.com/dextracker?filter=1';
 
@@ -77,8 +76,9 @@ EOF;
 
     private function assignMakerAndTakerFrom(
         ArrayIterator $content
-    ): void
+    ): array
     {
+        $tokensWithoutHolder = [];
         foreach ($content as $webElement) {
             try {
                 assert($webElement instanceof RemoteWebElement);
@@ -97,7 +97,7 @@ EOF;
                 $nameOfMaker = Name::fromString($name);
                 $currentTimestamp = time();
 
-                $maker = RedisReader::findKey($nameOfMaker->asString());
+                $maker = RedisReader::findKey($nameOfMaker);
                 if ($maker) {
                     continue;
                 }
@@ -106,7 +106,7 @@ EOF;
                     ->getAttribute('href');
 
                 $makerAddress = Address::fromString($address);
-                $this->returnCoins[] = Factory::createMaker(
+                $tokensWithoutHolder[] = Factory::createMaker(
                     $nameOfMaker,
                     $makerAddress,
                     $taker,
@@ -117,11 +117,14 @@ EOF;
                 continue;
             }
         }
+        return $tokensWithoutHolder;
     }
 
-    public function proveIfIsWorthToBuyIt(): void
+    public function proveIfIsWorthToBuyIt($makersWithoutHolders): array
     {
-        foreach ($this->returnCoins as $maker) {
+        $tokensForAlert = [];
+
+        foreach ($makersWithoutHolders as $maker) {
 
             try {
                 assert($maker instanceof Maker);
@@ -138,19 +141,19 @@ EOF;
                     $holdersNumber = (int)str_replace(',', "", explode(' ', $holdersString)[0]);
                     $holders = Holders::fromInt($holdersNumber);
                     $maker->setHolders($holders);
+
+                    $tokensForAlert[] = $maker;
                 } catch (InvalidArgumentException $exception) {
                     continue;
                 }
 
-            } catch
-            (InvalidArgumentException $e) {
+            } catch (WebDriverCurlException $e) {
+                $this->client->close();
                 continue;
             }
         }
-        Factory::createAlert()->sendMessage($this->returnCoins);
-        RedisWriter::writeToRedis($this->returnCoins);
-
-        echo "Validation Finished  for " . count($this->returnCoins) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
+        echo "Validation Finished  for " . count($tokensForAlert) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
+        return $tokensForAlert;
     }
 
     private function scrappingData(): void
@@ -158,32 +161,49 @@ EOF;
         for ($i = 0; $i < self::NUMBER_OF_SITES_TO_DOWNLOAD; $i++) {
             $this->client->refreshCrawler();
             $data = $this->getContent();
-            $this->assignMakerAndTakerFrom($data);
-            $this->proveIfIsWorthToBuyIt();
-            $nextPage = $this->client
-                ->findElement(WebDriverBy::cssSelector('#content > div.container.space-bottom-2 > div > div.card-body > div.d-md-flex.justify-content-between.mb-4 > nav > ul > li:nth-child(4) > a'));
-            usleep(200);
+            $tokensWithoutHolders = $this->assignMakerAndTakerFrom($data);
+            if (empty($tokensWithoutHolders)) {
+                continue;
+            }
+            $tokensReadyForAlert = $this->proveIfIsWorthToBuyIt($tokensWithoutHolders);
+            if (empty($tokensReadyForAlert)) {
+                continue;
+            }
+            Factory::createAlert()->sendMessage($tokensReadyForAlert);
+            usleep(90000);
+            RedisWriter::writeToRedis($tokensReadyForAlert);
+            usleep(30000);
+            try {
+                $nextPage = $this->client
+                    ->findElement(WebDriverBy::cssSelector('#content > div.container.space-bottom-2 > div > div.card-body > div.d-md-flex.justify-content-between.mb-4 > nav > ul > li:nth-child(4) > a'));
+            } catch (NoSuchElementException $exception) {
+                echo 'error';
+                continue;
+            }
+            usleep(30000);
             $nextPage->click();
             $this->client->refreshCrawler();
-            $this->returnCoins = [];
         }
     }
 
-    /**
-     * @return void
-     * @throws \Facebook\WebDriver\Exception\NoSuchElementException
-     * @throws \Facebook\WebDriver\Exception\UnexpectedTagNameException
-     */
     private function changeOnWebsiteToShowMoreRecords(): void
     {
-        $selectRows = $this->client->findElement(WebDriverBy::id('ContentPlaceHolder1_ddlRecordsPerPage'));
-        $webDriverSelect = Factory::createWebDriverSelect($selectRows);
-        $webDriverSelect->selectByIndex(self::INDEX_OF_SHOWN_ROWS);
+        try {
+            $selectRows = $this->client->findElement(WebDriverBy::id('ContentPlaceHolder1_ddlRecordsPerPage'));
+            usleep(30000);
+            $webDriverSelect = Factory::createWebDriverSelect($selectRows);
+            $webDriverSelect->selectByIndex(self::INDEX_OF_SHOWN_ROWS);
+            usleep(30000);
+        } catch (NoSuchElementException $exception) {
+            echo $exception->getMessage();
+        } catch (UnexpectedTagNameException $e) {
+            echo $e->getMessage();
+        }
     }
 
-    private function logTimeIfEmptyCloseClient(): void
+    private function logTimeIfEmptyCloseClient(int $counter): void
     {
-        echo count($this->returnCoins) + count($this->newTokens) . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
+        echo $counter . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
         if (empty($this->returnCoins) && empty($this->newTokens)) {
             $this->client->close();
             $this->client->quit();
@@ -198,12 +218,9 @@ EOF;
         $this->client = PantherClient::createChromeClient();
         $this->client->start();
         $this->client->get($url);
+        usleep(30000);
         $this->client->refreshCrawler();
-    }
-
-    public function getReturnCoins(): ?array
-    {
-        return $this->returnCoins;
+        usleep(30000);
     }
 
 }

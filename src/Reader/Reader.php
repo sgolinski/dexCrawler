@@ -2,7 +2,9 @@
 
 namespace DexCrawler\Reader;
 
+use DexCrawler\ValueObjects\Name;
+
 interface Reader
 {
-    public static function findKey($name): bool;
+    public static function findKey(Name $name): bool;
 }
