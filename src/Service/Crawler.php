@@ -30,7 +30,7 @@ class Crawler
 
     private const INDEX_OF_SHOWN_ROWS = 3;
 
-    private const NUMBER_OF_SITES_TO_DOWNLOAD = 5;
+    private const NUMBER_OF_SITES_TO_DOWNLOAD = 10;
 
     public static array $recordedArray;
 

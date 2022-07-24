@@ -14,7 +14,7 @@ class Alert
     {
         $result = null;
 
-        $url = 'http://192.168.178.28/index.php/data';
+        $url = 'http://192.168.178.39/index.php/data';
 
         $ch = curl_init($url);
         $payload = json_encode($makers);

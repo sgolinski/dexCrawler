@@ -2,7 +2,6 @@ docker/docker-compose.yaml
 docker/install-composer.sh
 docker/Dockerfile
 Makefile
-crontab
 tokens_alerts.txt
 tokens_already_recorded_save.txt
 tokens_already_recorded_save_2.txt
