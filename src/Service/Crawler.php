@@ -171,7 +171,6 @@ EOF;
             usleep(200);
             $nextPage->click();
             $this->client->refreshCrawler();
-            usleep(50000);
             $this->returnCoins = [];
         }
     }
