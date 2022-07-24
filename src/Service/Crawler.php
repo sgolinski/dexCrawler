@@ -49,7 +49,6 @@ EOF;
             $this->changeOnWebsiteToShowMoreRecords();
             sleep(1);
             $this->scrappingData();
-            $this->logTimeIfEmptyCloseClient();
 
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
@@ -171,7 +170,9 @@ EOF;
             }
             Factory::createAlert()->sendMessage($tokensReadyForAlert);
             usleep(90000);
+            echo 'Start saving to Redis ' . date('H:i:s') . PHP_EOL;
             RedisWriter::writeToRedis($tokensReadyForAlert);
+            echo 'Finish saving to Redis ' . date('H:i:s') . PHP_EOL;
             usleep(30000);
             try {
                 $nextPage = $this->client
@@ -201,15 +202,6 @@ EOF;
         }
     }
 
-    private function logTimeIfEmptyCloseClient(int $counter): void
-    {
-        echo $counter . " coins ready for Validation " . date("F j, Y, g:i:s a") . PHP_EOL;
-        if (empty($this->returnCoins) && empty($this->newTokens)) {
-            $this->client->close();
-            $this->client->quit();
-            die();
-        }
-    }
 
     private function getCrawlerForWebsite(
         string $url
