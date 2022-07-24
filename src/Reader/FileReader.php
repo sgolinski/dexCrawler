@@ -2,7 +2,7 @@
 
 namespace DexCrawler\Reader;
 
-class FileReader implements Reader
+class FileReader
 {
     public static function read(): array
     {

@@ -43,6 +43,7 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
             'Psr\\Log\\' => 8,
             'Psr\\EventDispatcher\\' => 20,
             'Psr\\Container\\' => 14,
+            'Predis\\' => 7,
         ),
         'M' => 
         array (
@@ -150,6 +151,10 @@ class ComposerStaticInit20bce2d152fe6c02a8987cf024e94f97
         'Psr\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
+        ),
+        'Predis\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/predis/predis/src',
         ),
         'Masterminds\\' => 
         array (

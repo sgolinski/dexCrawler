@@ -3,13 +3,13 @@
 namespace DexCrawler\Service;
 
 use DexCrawler\ValueObjects\Price;
-use DexCrawler\ValueObjects\Token;
+use DexCrawler\ValueObjects\Currency;
 use InvalidArgumentException;
 
 class Information
 {
     public array $information;
-    public Token $token;
+    public Currency $token;
     public Price $price;
 
     private function __construct(
@@ -48,7 +48,7 @@ class Information
         }
     }
 
-    public function getToken(): Token
+    public function getToken(): Currency
     {
         return $this->token;
     }
@@ -69,9 +69,9 @@ class Information
 
     private function extractTokenFrom(
         string $data
-    ): Token
+    ): Currency
     {
-        return Token::fromString(strtolower($data));
+        return Currency::fromString(strtolower($data));
     }
 
     private function ensureInformationAboutPriceIsNotNull(mixed $int)

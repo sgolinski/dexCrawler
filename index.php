@@ -1,6 +1,7 @@
 <?php
 
 use DexCrawler\Factory;
+use DexCrawler\Writer\RedisWriter;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -11,7 +12,7 @@ $alertService = Factory::createAlert();
 
 $crawler->invoke();
 
-$markers = $crawler->getReturnCoins();
+$makers = $crawler->getReturnCoins();
 
 if (!empty($markers)) {
     $alertService->invoke($markers);
@@ -19,3 +20,7 @@ if (!empty($markers)) {
     unset($crawler);
     die('Nothing to show ' . date("F j, Y, g:i:s a"));
 }
+echo 'Downloading information about large movers from last hour ' . date('H:i:s') . PHP_EOL;
+echo 'Start saving to Redis ' . date('H:i:s') . PHP_EOL;
+RedisWriter::writeToRedis($makers);
+echo 'Finish saving to Redis ' . date('H:i:s') . PHP_EOL;

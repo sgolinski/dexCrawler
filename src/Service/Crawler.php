@@ -6,14 +6,17 @@ use ArrayIterator;
 use DexCrawler\Entity\Maker;
 use DexCrawler\Factory;
 use DexCrawler\Reader\FileReader;
+use DexCrawler\Reader\RedisReader;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Holders;
 use DexCrawler\ValueObjects\Name;
 use DexCrawler\Writer\FileWriter;
+use DexCrawler\Writer\RedisWriter;
 use Exception;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Panther\Client as PantherClient;
 
 class Crawler
@@ -98,7 +101,6 @@ EOF;
 
         foreach ($content as $webElement) {
             try {
-                $updatedMaker = null;
 
                 assert($webElement instanceof RemoteWebElement);
                 $information = $webElement
@@ -106,10 +108,11 @@ EOF;
                     ->getText();
 
                 $service = Information::fromString($information);
+
                 $price = $service->getPrice();
                 $tokenNameOfTaker = $service->getToken();
-                $taker = Factory::createTaker($tokenNameOfTaker, $price,);
 
+                $taker = Factory::createTaker($tokenNameOfTaker, $price,);
                 $name = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
                     ->getText();
@@ -117,44 +120,39 @@ EOF;
                 $nameOfMaker = Name::fromString($name);
                 $currentTimestamp = time();
 
-                if (!empty(self::$recordedArray) && $this->checkIfRecordExistInRecordedArray($nameOfMaker) !== null) {
-                    $updatedMaker = $this->checkIfRecordExistInRecordedArray($nameOfMaker);
-                    if ($updatedMaker->holders === null) {
-                        $this->removeFromListOfSavedMakers($nameOfMaker);
-                        $updatedMaker = null;
-                    }
+                $maker = RedisReader::findKey($nameOfMaker->asString());
+
+                if ($maker) {
+                    continue;
                 }
 
-                if ($updatedMaker !== null) {
-                    $updatedMaker->updateCreated($currentTimestamp);
-                    $this->returnCoins[] = $updatedMaker;
+                $address = $webElement
+                    ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
+                    ->getAttribute('href');
+                $makerAddress = Address::fromString($address);
 
-                } else {
-                    $address = $webElement
-                        ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
-                        ->getAttribute('href');
-                    $makerAddress = Address::fromString($address);
-                    $maker = Factory::createMaker($nameOfMaker, $makerAddress, $taker, $currentTimestamp);
-                    self::$recordedArray[] = $maker;
-                    $this->newTokens[] = $maker;
-                }
+                $maker = Factory::createMaker($nameOfMaker, $makerAddress, $taker, $currentTimestamp);
+
+
+                $this->returnCoins[] = $maker;
+
             } catch (InvalidArgumentException $exception) {
                 continue;
             }
         }
     }
 
-    public function proveIfIsWorthToBuyIt(
-        array $makers
-    ): array
+    public function proveIfIsWorthToBuyIt(): void
     {
-        $uniqueMakers = [];
-        $existed = false;
-
-        foreach ($makers as $maker) {
+        foreach ($this->returnCoins as $maker) {
 
             try {
                 assert($maker instanceof Maker);
+
+                if ($maker->isComplete()) {
+                    continue;
+                }
+
                 $url = self::URL_TOKEN . $maker->getAddress()->asString();
                 $this->getCrawlerForWebsite($url);
                 $holdersString = $this->client->getCrawler()
@@ -168,20 +166,13 @@ EOF;
                 } catch (InvalidArgumentException $exception) {
                     continue;
                 }
-                $existed = $this->returnUniqueArrayFrom($uniqueMakers, $maker, $existed);
 
-                if (!$existed) {
-                    $uniqueMakers[] = $maker;
-                }
-
-                $existed = false;
             } catch
             (InvalidArgumentException $e) {
                 continue;
             }
         }
-        echo "Validation Finished  " . count($uniqueMakers) + count($this->returnCoins) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
-        return $uniqueMakers;
+        echo "Validation Finished  " . count($this->returnCoins) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
     }
 
     private function scrappingData(): void
@@ -230,22 +221,6 @@ EOF;
         $this->client->refreshCrawler();
     }
 
-    private function returnUniqueArrayFrom(
-        array $uniqueMakers,
-        Maker $maker,
-        bool  $existed
-    ): bool
-    {
-        if (!empty($uniqueMakers)) {
-            foreach ($uniqueMakers as $uniqueMaker) {
-                assert($uniqueMaker instanceof Maker);
-                if ($maker->getName()->asString() === $uniqueMaker->getName()->asString()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
     public function getReturnCoins(): ?array
     {
@@ -256,47 +231,5 @@ EOF;
     {
     }
 
-    public function checkIfRecordExistInRecordedArray(Name $name): ?Maker
-    {
-        if ($name === null) {
-            return null;
-        } else {
-            $name = $name->asString();
-        }
-        foreach (self::$recordedArray as $maker) {
-            if ($maker === null) {
-                continue;
-            }
-            assert($maker instanceof Maker);
-            if ($maker->getName()->asString() === $name) {
-                return $maker;
-            }
-        }
-        return null;
-    }
-
-    private function checkIfIsNotToNew(Maker $updatedMaker, int $currentTimestamp): bool
-    {
-        if ($currentTimestamp - $updatedMaker->getCreated() < 3600) {
-            $updatedMaker->updateCreated($currentTimestamp);
-            return true;
-        }
-        $updatedMaker->updateCreated($currentTimestamp);
-        return false;
-    }
-
-    private function removeFromListOfSavedMakers(Name $name)
-    {
-        for ($i = 0; $i <= count(self::$recordedArray); $i++) {
-            if (!isset(self::$recordedArray[$i])) {
-                continue;
-            }
-            assert(self::$recordedArray[$i] instanceof Maker);
-            if (self::$recordedArray[$i]->getName()->asString() === $name->asString()) {
-                self::$recordedArray[$i] = null;
-            }
-        }
-        self::$recordedArray = array_filter(self::$recordedArray);
-    }
 
 }

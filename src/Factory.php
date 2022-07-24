@@ -9,7 +9,7 @@ use DexCrawler\Service\Crawler;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Name;
 use DexCrawler\ValueObjects\Price;
-use DexCrawler\ValueObjects\Token;
+use DexCrawler\ValueObjects\Currency;
 use Facebook\WebDriver\WebDriverElement;
 use Facebook\WebDriver\WebDriverSelect;
 
@@ -19,15 +19,15 @@ class Factory
         Name    $name,
         Address $address,
         Taker   $taker,
-        int     $created
+        int     $created,
     ): Maker
     {
         return new Maker($name, $address, $taker, $created);
     }
 
     public static function createTaker(
-        Token $token,
-        Price $dropValue
+        Currency $token,
+        Price    $dropValue
     ): Taker
     {
         return new Taker($token, $dropValue);

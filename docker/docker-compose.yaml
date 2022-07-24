@@ -1,8 +1,8 @@
 version: "3.7"
 
 networks:
-  dex_crawler_4:
-    external: true
+  dex_network_1:
+    driver: "bridge"
 
 services:
   php-cli:
@@ -12,5 +12,26 @@ services:
     volumes:
       - ../:/mnt/app
     restart: always
+    links:
+      - dex-redis-1
     networks:
-      - dex_crawler_4
+      - alert-queue
+
+  dex-redis-1:
+    image: redis:4.0
+    container_name: dex_redis_1
+    restart: always
+    command:
+      - 'redis-server'
+      - '--loglevel ${REDIS_LOGLEVEL:-warning}'
+      - '--databases 2'
+      - '--save 900 1'
+      - '--save 300 10'
+      - '--save 60 10000'
+      - '--maxmemory ${REDIS_MAXMEM:-50mb}'
+    volumes:
+      - ./redis/data:/data
+    ports:
+      - "6382:6379"
+    networks:
+      - dex_network_1

@@ -4,12 +4,12 @@ namespace DexCrawler\Entity;
 
 use DexCrawler\ValueObjects\Name;
 use DexCrawler\ValueObjects\Price;
-use DexCrawler\ValueObjects\Token;
+use DexCrawler\ValueObjects\Currency;
 use InvalidArgumentException;
 
 class Taker
 {
-    public Token $token;
+    public Currency $token;
 
     public Price $dropValue;
 
@@ -26,8 +26,8 @@ class Taker
         ];
 
     public function __construct(
-        Token $token,
-        Price $dropValue
+        Currency $token,
+        Price    $dropValue
     )
     {
         $this->ensureIsAllowedTakerToken($token);
@@ -36,16 +36,16 @@ class Taker
         $this->dropValue = $dropValue;
     }
 
-    public function ensureIsAllowedTakerToken(Token $token): void
+    public function ensureIsAllowedTakerToken(Currency $token): void
     {
         if (!in_array($token->asString(), Name::ALLOWED_TAKER_TOKENS_NAMES)) {
-            throw new InvalidArgumentException('Token not allowed');
+            throw new InvalidArgumentException('Currency not allowed');
         }
     }
 
     private function ensureDropPriceIsHighEnough(
-        Token $token,
-        Price $dropValue
+        Currency $token,
+        Price    $dropValue
     ): void
     {
         if ($dropValue->asFloat() < self::ALLOWED_PRICE_PER_TOKEN[$token->asString()]) {
@@ -54,9 +54,9 @@ class Taker
     }
 
     /**
-     * @return Token
+     * @return Currency
      */
-    public function getToken(): Token
+    public function getToken(): Currency
     {
         return $this->token;
     }

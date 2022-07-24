@@ -2,7 +2,7 @@
 
 namespace DexCrawler\ValueObjects;
 
-class Token
+class Currency
 {
     public string $token;
 

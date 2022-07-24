@@ -20,7 +20,7 @@ class Maker
         Name    $name,
         Address $address,
         Taker   $taker,
-        int     $created
+        int     $created,
     )
     {
         $this->ensureTokenNameIsNotBlacklisted($name->asString());
@@ -37,7 +37,7 @@ class Maker
     ): void
     {
         if (in_array($name, NAME::BLACKLISTED_NAMES)) {
-            throw new InvalidArgumentException('Token is on the blacklist');
+            throw new InvalidArgumentException('Currency is on the blacklist');
         }
     }
 
@@ -59,17 +59,11 @@ class Maker
             "Poocoin: " . $this->getExternalListingByIndex('poocoin') . PHP_EOL;
     }
 
-    /**
-     * @return Address
-     */
     public function getAddress(): Address
     {
         return $this->address;
     }
 
-    /**
-     * @return Name
-     */
     public function getName(): Name
     {
         return $this->name;
@@ -80,25 +74,16 @@ class Maker
         $this->holders = $holders;
     }
 
-    /**
-     * @return Holders
-     */
     public function getHolders(): Holders
     {
         return $this->holders;
     }
 
-    /**
-     * @return Taker
-     */
     public function getTaker(): Taker
     {
         return $this->taker;
     }
 
-    /**
-     * @return string
-     */
     public function getExternalListingByIndex(
         string $index
     ): string
@@ -106,17 +91,10 @@ class Maker
         return $this->externalListingLinks[$index];
     }
 
-    /**
-     * @return int
-     */
     public function getCreated(): int
     {
         return $this->created;
     }
 
-    public function updateCreated(int $time)
-    {
-        $this->created = $time;
-    }
 
 }

@@ -16,6 +16,7 @@
         "symfony/css-selector": "^6.0",
         "php-webdriver/webdriver": "^1.12",
         "ext-curl": "*",
-        "ci/restclientbundle": "^2.0"
+        "ci/restclientbundle": "^2.0",
+        "predis/predis": "^2.0"
     }
 }
