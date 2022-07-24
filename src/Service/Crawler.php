@@ -5,18 +5,15 @@ namespace DexCrawler\Service;
 use ArrayIterator;
 use DexCrawler\Entity\Maker;
 use DexCrawler\Factory;
-use DexCrawler\Reader\FileReader;
 use DexCrawler\Reader\RedisReader;
 use DexCrawler\ValueObjects\Address;
 use DexCrawler\ValueObjects\Holders;
 use DexCrawler\ValueObjects\Name;
-use DexCrawler\Writer\FileWriter;
 use DexCrawler\Writer\RedisWriter;
 use Exception;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Panther\Client as PantherClient;
 
 class Crawler
@@ -55,7 +52,6 @@ EOF;
             $this->scrappingData();
             $this->logTimeIfEmptyCloseClient();
 
-
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
         } finally {
@@ -83,10 +79,8 @@ EOF;
         ArrayIterator $content
     ): void
     {
-
         foreach ($content as $webElement) {
             try {
-
                 assert($webElement instanceof RemoteWebElement);
                 $information = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))

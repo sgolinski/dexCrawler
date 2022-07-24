@@ -15,7 +15,7 @@ services:
     links:
       - dex-redis-1
     networks:
-      - alert-queue
+      - dex_network_1
 
   dex-redis-1:
     image: redis:4.0
