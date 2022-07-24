@@ -35,11 +35,6 @@ class Crawler
 
     private const NUMBER_OF_SITES_TO_DOWNLOAD = 10;
 
-    public static array $recordedArray;
-
-    public array $newTokens = [];
-
-
     private const SCRIPT = <<<EOF
 var selectedA = document.querySelector('#selectDex');
 var divWithDexList = document.querySelector('#selectDexButton');
@@ -48,12 +43,6 @@ var select = document.getElementById('ContentPlaceHolder1_ddlRecordsPerPage');
 selectedA.click();
 divWithDexList.querySelector('#selectDexButton > a:nth-child(5) > img').click();
 EOF;
-
-    public function __construct()
-    {
-
-        self::$recordedArray = [];
-    }
 
     public function invoke(): void
     {
@@ -66,10 +55,6 @@ EOF;
             $this->scrappingData();
             $this->logTimeIfEmptyCloseClient();
 
-            $this->newTokens = $this->proveIfIsWorthToBuyIt($this->newTokens);
-            $this->returnCoins = array_merge($this->newTokens, $this->returnCoins);
-
-            FileWriter::write(self::$recordedArray);
 
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
@@ -108,10 +93,8 @@ EOF;
                     ->getText();
 
                 $service = Information::fromString($information);
-
                 $price = $service->getPrice();
                 $tokenNameOfTaker = $service->getToken();
-
                 $taker = Factory::createTaker($tokenNameOfTaker, $price,);
                 $name = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
@@ -121,20 +104,20 @@ EOF;
                 $currentTimestamp = time();
 
                 $maker = RedisReader::findKey($nameOfMaker->asString());
-
                 if ($maker) {
                     continue;
                 }
-
                 $address = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
                     ->getAttribute('href');
+
                 $makerAddress = Address::fromString($address);
-
-                $maker = Factory::createMaker($nameOfMaker, $makerAddress, $taker, $currentTimestamp);
-
-
-                $this->returnCoins[] = $maker;
+                $this->returnCoins[] = Factory::createMaker(
+                    $nameOfMaker,
+                    $makerAddress,
+                    $taker,
+                    $currentTimestamp
+                );
 
             } catch (InvalidArgumentException $exception) {
                 continue;
@@ -149,12 +132,10 @@ EOF;
             try {
                 assert($maker instanceof Maker);
 
-                if ($maker->isComplete()) {
-                    continue;
-                }
-
                 $url = self::URL_TOKEN . $maker->getAddress()->asString();
+
                 $this->getCrawlerForWebsite($url);
+
                 $holdersString = $this->client->getCrawler()
                     ->filter('#ContentPlaceHolder1_tr_tokenHolders > div > div.col-md-8 > div > div')
                     ->getText();
@@ -172,7 +153,10 @@ EOF;
                 continue;
             }
         }
-        echo "Validation Finished  " . count($this->returnCoins) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
+        Factory::createAlert()->sendMessage($this->returnCoins);
+        RedisWriter::writeToRedis($this->returnCoins);
+
+        echo "Validation Finished  for " . count($this->returnCoins) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
     }
 
     private function scrappingData(): void
@@ -181,11 +165,14 @@ EOF;
             $this->client->refreshCrawler();
             $data = $this->getContent();
             $this->assignMakerAndTakerFrom($data);
+            $this->proveIfIsWorthToBuyIt();
             $nextPage = $this->client
                 ->findElement(WebDriverBy::cssSelector('#content > div.container.space-bottom-2 > div > div.card-body > div.d-md-flex.justify-content-between.mb-4 > nav > ul > li:nth-child(4) > a'));
             usleep(200);
             $nextPage->click();
             $this->client->refreshCrawler();
+            usleep(50000);
+            $this->returnCoins = [];
         }
     }
 
@@ -221,15 +208,9 @@ EOF;
         $this->client->refreshCrawler();
     }
 
-
     public function getReturnCoins(): ?array
     {
         return $this->returnCoins;
     }
-
-    public function __destruct()
-    {
-    }
-
 
 }

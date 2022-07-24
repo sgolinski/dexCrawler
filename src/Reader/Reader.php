@@ -4,5 +4,5 @@ namespace DexCrawler\Reader;
 
 interface Reader
 {
-    public static function read(): array;
+    public static function findKey($name): bool;
 }

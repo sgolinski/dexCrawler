@@ -2,11 +2,9 @@
 
 namespace DexCrawler\Writer;
 
-
 use DexCrawler\Datastore\Redis;
 use DexCrawler\Entity\Maker;
 use Exception;
-
 
 class RedisWriter
 {
@@ -23,14 +21,4 @@ class RedisWriter
         Redis::get_redis()->save();
     }
 
-    public static function updateMaker(Maker $maker)
-    {
-        try {
-            Redis::get_redis()->del($maker->getName()->asString());
-            usleep(20000);
-            Redis::get_redis()->set($maker->getName()->asString(), serialize($maker));
-        } catch (Exception $exception) {
-            echo $exception->getMessage();
-        }
-    }
 }

@@ -12,8 +12,6 @@ class Alert
 
     public function sendMessage(array $makers)
     {
-        $result = null;
-
         $url = 'http://192.168.178.39/index.php/data';
 
         $ch = curl_init($url);

@@ -32,6 +32,6 @@ services:
     volumes:
       - ./redis/data:/data
     ports:
-      - "6382:6379"
+      - "6382:6383"
     networks:
       - dex_network_1
