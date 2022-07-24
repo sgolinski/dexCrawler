@@ -13,11 +13,11 @@ services:
       - ../:/mnt/app
     restart: always
     links:
-      - dex-redis-1
+      - redis
     networks:
       - dex_network_1
 
-  dex-redis-1:
+  redis:
     image: redis:4.0
     container_name: dex_redis_1
     restart: always
@@ -32,6 +32,6 @@ services:
     volumes:
       - ./redis/data:/data
     ports:
-      - "6382:6383"
+      - "6382:6379"
     networks:
       - dex_network_1
