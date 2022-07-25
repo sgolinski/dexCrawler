@@ -59,7 +59,9 @@ EOF;
             $this->client->restart();
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
+            $this->client->restart();
         } finally {
+            $this->client->close();
             $this->client->quit();
         }
     }
