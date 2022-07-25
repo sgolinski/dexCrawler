@@ -35,7 +35,7 @@ class Alert
 
     public function sendSlackMessage($slack, array $potentialDrops): void
     {
-        $message = Factory::createSlackMessage()->setText($potentialDrops);
+        $message = Factory::createSlackMessage()->setText(implode("\n", $potentialDrops));
         $slack->sendMessage($message);
 
     }
