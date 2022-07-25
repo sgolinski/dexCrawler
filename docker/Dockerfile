@@ -5,10 +5,13 @@ WORKDIR /mnt/app
 ENV PANTHER_NO_SANDBOX 1
 ENV PANTHER_CHROME_ARGUMENTS='--disable-dev-shm-usage'
 
-COPY /opcache.ini /usr/local/etc/php/conf.d/
+#COPY /opcache.ini /usr/local/etc/php/conf.d/
 
 RUN apk add libzip-dev libzip zip libxml2-dev \
-    && docker-php-ext-install zip xml
+    && docker-php-ext-install zip xml \
+
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
 
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 

@@ -17,6 +17,7 @@
         "php-webdriver/webdriver": "^1.12",
         "ext-curl": "*",
         "ci/restclientbundle": "^2.0",
-        "predis/predis": "^2.0"
+        "predis/predis": "^2.0",
+        "monolog/monolog": "^3.2"
     }
 }

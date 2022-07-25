@@ -12,6 +12,7 @@ use DexCrawler\ValueObjects\Price;
 use DexCrawler\ValueObjects\Currency;
 use Facebook\WebDriver\WebDriverElement;
 use Facebook\WebDriver\WebDriverSelect;
+use Monolog\Logger;
 
 class Factory
 {
@@ -53,4 +54,8 @@ class Factory
         return new Alert();
     }
 
+    public static function createLogger(): Logger
+    {
+        return new Logger('dex');
+    }
 }

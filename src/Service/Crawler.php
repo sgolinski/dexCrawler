@@ -13,15 +13,18 @@ use DexCrawler\Writer\RedisWriter;
 use Exception;
 use Facebook\WebDriver\Exception\NoSuchElementException;
 use Facebook\WebDriver\Exception\UnexpectedTagNameException;
-use Facebook\WebDriver\Exception\WebDriverCurlException;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use InvalidArgumentException;
 use Symfony\Component\Panther\Client as PantherClient;
 
+
 class Crawler
 {
     private PantherClient $client;
+
+    public array $namesToFindDrop = [];
+
 
     private const URL = 'https://bscscan.com/dextracker?filter=1';
 
@@ -29,7 +32,7 @@ class Crawler
 
     private const INDEX_OF_SHOWN_ROWS = 3;
 
-    private const NUMBER_OF_SITES_TO_DOWNLOAD = 10;
+    private const NUMBER_OF_SITES_TO_DOWNLOAD = 20;
 
     private const SCRIPT = <<<EOF
 var selectedA = document.querySelector('#selectDex');
@@ -40,10 +43,12 @@ selectedA.click();
 divWithDexList.querySelector('#selectDexButton > a:nth-child(5) > img').click();
 EOF;
 
+
     public function invoke(): void
     {
         try {
             echo "Start crawling " . date("F j, Y, g:i:s a") . PHP_EOL;
+            Factory::createLogger()->info('Start crawling ');
             $this->getCrawlerForWebsite(self::URL);
             $this->client->executeScript(self::SCRIPT);
             $this->changeOnWebsiteToShowMoreRecords();
@@ -60,6 +65,7 @@ EOF;
 
     private function getContent(): ?ArrayIterator
     {
+        Factory::createLogger()->info('Start getting content ');
         try {
             $list = $this->client->getCrawler()
                 ->filter('#content > div.container.space-bottom-2 > div > div.card-body')
@@ -70,62 +76,71 @@ EOF;
         } catch (Exception $exception) {
             echo $exception->getMessage();
         }
+        Factory::createLogger()->info('Finish getting content ');
         return $list;
     }
 
     private function assignMakerAndTakerFrom(
-        ArrayIterator $content
+        ?ArrayIterator $content
     ): array
     {
+        Factory::createLogger()->info('Start assigning from content ');
         $tokensWithoutHolder = [];
         foreach ($content as $webElement) {
             try {
                 assert($webElement instanceof RemoteWebElement);
-                $information = $webElement
-                    ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))
-                    ->getText();
 
-                $service = Information::fromString($information);
-                $price = $service->getPrice();
-                $tokenNameOfTaker = $service->getToken();
-                $taker = Factory::createTaker($tokenNameOfTaker, $price,);
                 $name = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
                     ->getText();
 
-                $nameOfMaker = Name::fromString($name);
-                $currentTimestamp = time();
 
+                $this->namesToFindDrop[] = $name;
+
+                $nameOfMaker = Name::fromString($name);
                 $maker = RedisReader::findKey($nameOfMaker);
+
                 if ($maker) {
                     continue;
                 }
+
+                $information = $webElement
+                    ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(5)'))
+                    ->getText();
+                $service = Information::fromString($information);
+                $tokenNameOfTaker = $service->getToken();
+                $price = $service->getPrice();
+                $taker = Factory::createTaker($tokenNameOfTaker, $price);
+                $currentTimestamp = time();
+
                 $address = $webElement
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
                     ->getAttribute('href');
 
                 $makerAddress = Address::fromString($address);
-                $tokensWithoutHolder[] = Factory::createMaker(
+
+                $token = Factory::createMaker(
                     $nameOfMaker,
                     $makerAddress,
                     $taker,
                     $currentTimestamp
                 );
-
-            } catch (InvalidArgumentException $exception) {
+                $tokensWithoutHolder[] = $token;
+            } catch (InvalidArgumentException) {
                 continue;
             }
         }
+        Factory::createLogger()->alert('Finish assigning from content ');
         return $tokensWithoutHolder;
     }
 
-    public function proveIfIsWorthToBuyIt($makersWithoutHolders): array
+    public function proveIfIsWorthToBuyIt($makersWithoutHolders): ?array
     {
-        $tokensForAlert = [];
+        if ($makersWithoutHolders !== null) {
+            $tokensForAlert = [];
+            Factory::createLogger()->alert('Start assigning holders ');
+            foreach ($makersWithoutHolders as $maker) {
 
-        foreach ($makersWithoutHolders as $maker) {
-
-            try {
                 assert($maker instanceof Maker);
 
                 $url = self::URL_TOKEN . $maker->getAddress()->asString();
@@ -142,48 +157,39 @@ EOF;
                     $maker->setHolders($holders);
 
                     $tokensForAlert[] = $maker;
-                } catch (InvalidArgumentException $exception) {
+                } catch (Exception) {
                     continue;
                 }
-
-            } catch (WebDriverCurlException $e) {
-                $this->client->close();
-                continue;
             }
+            Factory::createLogger()->info('Finish assigning holders');
+
+            return $tokensForAlert;
+
+        } else {
+            return null;
         }
-        echo "Validation Finished  for " . count($tokensForAlert) . " coins are unique or not scam " . date("F j, Y, g:i:s a") . PHP_EOL;
-        return $tokensForAlert;
     }
 
     private function scrappingData(): void
     {
+        $tokensWithoutHolders = [];
         for ($i = 0; $i < self::NUMBER_OF_SITES_TO_DOWNLOAD; $i++) {
             $this->client->refreshCrawler();
             $data = $this->getContent();
-            $tokensWithoutHolders = $this->assignMakerAndTakerFrom($data);
-            if (empty($tokensWithoutHolders)) {
-                continue;
-            }
-            $tokensReadyForAlert = $this->proveIfIsWorthToBuyIt($tokensWithoutHolders);
-            if (empty($tokensReadyForAlert)) {
-                continue;
-            }
-            Factory::createAlert()->sendMessage($tokensReadyForAlert);
-            usleep(90000);
-            echo 'Start saving to Redis ' . date('H:i:s') . PHP_EOL;
-            RedisWriter::writeToRedis($tokensReadyForAlert);
-            echo 'Finish saving to Redis ' . date('H:i:s') . PHP_EOL;
-            usleep(30000);
-            try {
-                $nextPage = $this->client
-                    ->findElement(WebDriverBy::cssSelector('#content > div.container.space-bottom-2 > div > div.card-body > div.d-md-flex.justify-content-between.mb-4 > nav > ul > li:nth-child(4) > a'));
-            } catch (NoSuchElementException $exception) {
-                echo 'error';
-                continue;
-            }
+            $tokensWithoutHolders[] = $this->assignMakerAndTakerFrom($data);
+            $nextPage = $this->client
+                ->findElement(WebDriverBy::cssSelector('#ctl00 > div.d-md-flex.justify-content-between.my-3 > ul > li:nth-child(4) > a'));
             usleep(30000);
             $nextPage->click();
             $this->client->refreshCrawler();
+        }
+
+        foreach ($tokensWithoutHolders as $packet) {
+            $tokensReadyForAlert = $this->proveIfIsWorthToBuyIt($packet);
+            if ($tokensReadyForAlert) {
+                Factory::createAlert()->sendMessage($packet);
+                RedisWriter::writeToRedis($packet);
+            }
         }
     }
 
@@ -213,6 +219,11 @@ EOF;
         usleep(30000);
         $this->client->refreshCrawler();
         usleep(30000);
+    }
+
+    public function getNamesToFindDrop(): array
+    {
+        return $this->namesToFindDrop;
     }
 
 }

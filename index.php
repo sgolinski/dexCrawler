@@ -11,4 +11,6 @@ $crawler = Factory::createCrawlerService();
 
 $crawler->invoke();
 
+
 echo 'Cronjob finished ' . date('H:i:s') . PHP_EOL;
+var_dump(array_count_values($crawler->getNamesToFindDrop()));

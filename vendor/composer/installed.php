@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '1c05e0cde6c504f1a0f25d9e482fa2c378f166c8',
+        'reference' => '172397b089857eec4d0246040b8be45e50978dbe',
         'name' => 'szymon/dex_tracker_crawler',
         'dev' => true,
     ),
@@ -32,6 +32,15 @@
             'install_path' => __DIR__ . '/../masterminds/html5',
             'aliases' => array(),
             'reference' => 'f640ac1bdddff06ea333a920c95bbad8872429ab',
+            'dev_requirement' => false,
+        ),
+        'monolog/monolog' => array(
+            'pretty_version' => '3.2.0',
+            'version' => '3.2.0.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../monolog/monolog',
+            'aliases' => array(),
+            'reference' => '305444bc6fb6c89e490f4b34fa6e979584d7fa81',
             'dev_requirement' => false,
         ),
         'php-http/async-client-implementation' => array(
@@ -113,6 +122,7 @@
             'dev_requirement' => false,
             'provided' => array(
                 0 => '1.0|2.0|3.0',
+                1 => '3.0.0',
             ),
         ),
         'symfony/browser-kit' => array(
@@ -328,7 +338,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '1c05e0cde6c504f1a0f25d9e482fa2c378f166c8',
+            'reference' => '172397b089857eec4d0246040b8be45e50978dbe',
             'dev_requirement' => false,
         ),
     ),

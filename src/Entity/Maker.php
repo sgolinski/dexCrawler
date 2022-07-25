@@ -52,11 +52,11 @@ class Maker
 
     public function alert(): string
     {
-        return "Name: " . $this->name->asString() . PHP_EOL .
+        return PHP_EOL . PHP_EOL . "Tracker with redis \nName: " . $this->name->asString() . PHP_EOL .
             "Drop value: -" . $this->getTaker()->getDropValue()->asFloat() . ' ' . $this->getTaker()->getToken()->asString() . PHP_EOL .
             "Cmc: " . $this->getExternalListingByIndex('cmc') . PHP_EOL .
             "Coingecko: " . $this->getExternalListingByIndex('coingecko') . PHP_EOL .
-            "Poocoin: " . $this->getExternalListingByIndex('poocoin') . PHP_EOL;
+            "Poocoin: " . $this->getExternalListingByIndex('poocoin') . PHP_EOL . PHP_EOL;
     }
 
     public function getAddress(): Address
