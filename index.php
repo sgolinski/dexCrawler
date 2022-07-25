@@ -16,7 +16,7 @@ $crawler = Factory::createCrawlerService();
 $crawler->invoke();
 
 echo 'Cronjob finished ' . date('H:i:s') . PHP_EOL;
-if (Redis::get_redis()->dbsize() > 300) {
+if (Redis::get_redis()->dbsize() > 900) {
     Redis::get_redis()->flushall();
 }
 $potentialDrop = array_count_values($crawler->getNamesToFindDrop());
