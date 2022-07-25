@@ -38,7 +38,7 @@ class Taker
 
     public function ensureIsAllowedTakerToken(Currency $token): void
     {
-        if (!in_array($token->asString(), Name::ALLOWED_TAKER_TOKENS_NAMES)) {
+        if (!in_array($token->asString(), Name::$allowedTakerNames)) {
             throw new InvalidArgumentException('Currency not allowed');
         }
     }

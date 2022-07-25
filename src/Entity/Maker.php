@@ -36,7 +36,7 @@ class Maker
         string $name
     ): void
     {
-        if (in_array($name, NAME::BLACKLISTED_NAMES)) {
+        if (in_array($name, NAME::$blackListedCoins)) {
             throw new InvalidArgumentException('Currency is on the blacklist');
         }
     }
@@ -56,7 +56,8 @@ class Maker
             "Drop value: -" . $this->getTaker()->getDropValue()->asFloat() . ' ' . $this->getTaker()->getToken()->asString() . PHP_EOL .
             "Cmc: " . $this->getExternalListingByIndex('cmc') . PHP_EOL .
             "Coingecko: " . $this->getExternalListingByIndex('coingecko') . PHP_EOL .
-            "Poocoin: " . $this->getExternalListingByIndex('poocoin') . PHP_EOL . PHP_EOL;
+            "Poocoin: " . $this->getExternalListingByIndex('poocoin') . PHP_EOL .
+            'Sended from Redis' . PHP_EOL;
     }
 
     public function getAddress(): Address
@@ -95,6 +96,5 @@ class Maker
     {
         return $this->created;
     }
-
 
 }

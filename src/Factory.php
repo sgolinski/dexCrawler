@@ -12,7 +12,9 @@ use DexCrawler\ValueObjects\Price;
 use DexCrawler\ValueObjects\Currency;
 use Facebook\WebDriver\WebDriverElement;
 use Facebook\WebDriver\WebDriverSelect;
-use Monolog\Logger;
+use Maknz\Slack\Client as SlackClient;
+use Maknz\Slack\Message;
+
 
 class Factory
 {
@@ -54,8 +56,13 @@ class Factory
         return new Alert();
     }
 
-    public static function createLogger(): Logger
+    public static function createSlackClient(string $hook): SlackClient
     {
-        return new Logger('dex');
+        return new SlackClient($hook);
+    }
+
+    public static function createSlackMessage(): Message
+    {
+        return new Message();
     }
 }

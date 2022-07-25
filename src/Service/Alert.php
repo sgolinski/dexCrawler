@@ -3,6 +3,8 @@
 namespace DexCrawler\Service;
 
 
+use DexCrawler\Factory;
+
 class Alert
 {
     public function invoke(array $tokens): void
@@ -12,17 +14,11 @@ class Alert
 
     public function sendMessage(array $makers)
     {
-        usleep(10000);
         $url = 'http://192.168.178.39/index.php/data';
-        usleep(10000);
         $ch = curl_init($url);
-        usleep(10000);
         $payload = json_encode($makers);
-        usleep(10000);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        usleep(10000);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-        usleep(10000);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         usleep(10000);
         $result = curl_exec($ch);
@@ -36,5 +32,12 @@ class Alert
         }
     }
 
+
+    public function sendSlackMessage($slack, array $potentialDrops): void
+    {
+        $message = Factory::createSlackMessage()->setText($potentialDrops);
+        $slack->sendMessage($message);
+
+    }
 
 }

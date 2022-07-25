@@ -6,7 +6,7 @@ class Name
 {
     public string $name;
 
-    public const BLACKLISTED_NAMES = [
+    public static $blackListedCoins = [
         'bnb', 'wbnb', 'eth', 'cake', 'btcb', 'ddao', 'tbac', 'swace', 'sw', 'fgd', 'rld', 'vnt', 'cpad', 'naka',
         'kishurai', 'spacexfalcon', 'sin', 'tube', 'blue', 'vinu', 'codi', 'birdman', 'citi', 'xmx', 'ameta', 'tm',
         'ape', 'hbx', 'dlsc', 'elon', 'klv', 'eshare', 'air', 'fi', 's2k', 'fast', 'pp', 'gvr', 'dexshare', 'chx',
@@ -28,7 +28,7 @@ class Name
     ];
 
 
-    public const ALLOWED_TAKER_TOKENS_NAMES = [
+    public static $allowedTakerNames = [
         'wbnb', 'cake', 'bnb', 'usdc', 'busd', 'usdt', 'fusdt', 'usdp'
     ];
 

@@ -24,15 +24,18 @@ class Crawler
     private PantherClient $client;
 
     public array $namesToFindDrop = [];
-
-
+    public static $hook = 'https://hooks.slack.com/services/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';
     private const URL = 'https://bscscan.com/dextracker?filter=1';
 
     private const URL_TOKEN = 'https://bscscan.com/token/';
 
     private const INDEX_OF_SHOWN_ROWS = 3;
 
-    private const NUMBER_OF_SITES_TO_DOWNLOAD = 20;
+    public static $valuesForCrawler = [
+        [10, 50],
+        [20, 50],
+        [50, 110],
+    ];
 
     private const SCRIPT = <<<EOF
 var selectedA = document.querySelector('#selectDex');
@@ -48,24 +51,22 @@ EOF;
     {
         try {
             echo "Start crawling " . date("F j, Y, g:i:s a") . PHP_EOL;
-            Factory::createLogger()->info('Start crawling ');
             $this->getCrawlerForWebsite(self::URL);
             $this->client->executeScript(self::SCRIPT);
             $this->changeOnWebsiteToShowMoreRecords();
             sleep(1);
             $this->scrappingData();
-
+            $this->client->restart();
         } catch (Exception $exception) {
             echo $exception->getMessage() . PHP_EOL;
         } finally {
-            $this->client->close();
             $this->client->quit();
         }
     }
 
     private function getContent(): ?ArrayIterator
     {
-        Factory::createLogger()->info('Start getting content ');
+
         try {
             $list = $this->client->getCrawler()
                 ->filter('#content > div.container.space-bottom-2 > div > div.card-body')
@@ -76,7 +77,6 @@ EOF;
         } catch (Exception $exception) {
             echo $exception->getMessage();
         }
-        Factory::createLogger()->info('Finish getting content ');
         return $list;
     }
 
@@ -84,7 +84,6 @@ EOF;
         ?ArrayIterator $content
     ): array
     {
-        Factory::createLogger()->info('Start assigning from content ');
         $tokensWithoutHolder = [];
         foreach ($content as $webElement) {
             try {
@@ -94,11 +93,10 @@ EOF;
                     ->findElement(WebDriverBy::cssSelector('tr > td:nth-child(3) > a'))
                     ->getText();
 
-
                 $this->namesToFindDrop[] = $name;
 
                 $nameOfMaker = Name::fromString($name);
-                $maker = RedisReader::findKey($nameOfMaker);
+                $maker = RedisReader::findKey($nameOfMaker->asString());
 
                 if ($maker) {
                     continue;
@@ -130,15 +128,16 @@ EOF;
                 continue;
             }
         }
-        Factory::createLogger()->alert('Finish assigning from content ');
+
         return $tokensWithoutHolder;
     }
 
     public function proveIfIsWorthToBuyIt($makersWithoutHolders): ?array
     {
+
         if ($makersWithoutHolders !== null) {
             $tokensForAlert = [];
-            Factory::createLogger()->alert('Start assigning holders ');
+
             foreach ($makersWithoutHolders as $maker) {
 
                 assert($maker instanceof Maker);
@@ -161,8 +160,6 @@ EOF;
                     continue;
                 }
             }
-            Factory::createLogger()->info('Finish assigning holders');
-
             return $tokensForAlert;
 
         } else {
@@ -173,16 +170,19 @@ EOF;
     private function scrappingData(): void
     {
         $tokensWithoutHolders = [];
-        for ($i = 0; $i < self::NUMBER_OF_SITES_TO_DOWNLOAD; $i++) {
+        echo 'Start getting content ' . date("F j, Y, g:i:s a") . PHP_EOL;
+        for ($i = 0; $i < self::$valuesForCrawler[1][0]; $i++) {
             $this->client->refreshCrawler();
             $data = $this->getContent();
             $tokensWithoutHolders[] = $this->assignMakerAndTakerFrom($data);
             $nextPage = $this->client
                 ->findElement(WebDriverBy::cssSelector('#ctl00 > div.d-md-flex.justify-content-between.my-3 > ul > li:nth-child(4) > a'));
-            usleep(30000);
+            usleep(3000);
             $nextPage->click();
             $this->client->refreshCrawler();
         }
+        echo 'Finish getting content ' . date("F j, Y, g:i:s a") . PHP_EOL;;
+        echo 'Start assigning holders ' . date("F j, Y, g:i:s a") . PHP_EOL;
 
         foreach ($tokensWithoutHolders as $packet) {
             $tokensReadyForAlert = $this->proveIfIsWorthToBuyIt($packet);
@@ -191,6 +191,8 @@ EOF;
                 RedisWriter::writeToRedis($packet);
             }
         }
+        echo 'Finish assigning holders ' . date("F j, Y, g:i:s a") . PHP_EOL;
+
     }
 
     private function changeOnWebsiteToShowMoreRecords(): void

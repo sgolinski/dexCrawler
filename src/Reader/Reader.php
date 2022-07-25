@@ -6,5 +6,5 @@ use DexCrawler\ValueObjects\Name;
 
 interface Reader
 {
-    public static function findKey(Name $name): bool;
+    public static function findKey(string $name): bool;
 }
